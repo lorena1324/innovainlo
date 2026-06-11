@@ -1,1164 +1,545 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Consolidado — INNOVAPEP</title>
+<title>Dashboard · INNOVAPEP / INLOTRANS</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#06090f;--s1:#0c1118;--s2:#111820;--s3:#182030;--s4:#1f2a3c;
-  --border:rgba(255,255,255,0.05);--border2:rgba(255,255,255,0.09);--border3:rgba(255,255,255,0.15);
-  --gold:#f5c518;--teal:#0de8c7;--coral:#ff4d6a;--sky:#3ab4f5;--violet:#b08fff;--green:#1fd47a;--orange:#ff8c42;
-  --text:#c8d6e8;--muted:#3d5269;--muted2:#5e7d99;--muted3:#8aa3bc;
-  --r:10px;--r2:14px;
-  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--display:'Bebas Neue',sans-serif;
+:root {
+  --bg: #080c12; --s1: #0d1320; --s2: #111a28; --s3: #172030; --s4: #1e2d42;
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.10); --border3: rgba(255,255,255,0.16);
+  --gold: #f0b429; --teal: #10d4b4; --coral: #f5576c; --sky: #38b2f5; --violet: #a78bfa;
+  --green: #22c55e; --orange: #fb923c; --text: #cad5e2; --muted: #3d5575; --muted2: #607a96; --muted3: #8aa3bc;
+  --r: 10px; --mono: 'JetBrains Mono', monospace; --sans: 'Inter', sans-serif;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;font-size:14px;line-height:1.5}
-
-/* LOADER */
-#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .5s;}
-#loader.hide{opacity:0;pointer-events:none}
-.loader-logo{font-family:var(--display);font-size:52px;letter-spacing:4px;color:#fff}
-.loader-logo em{color:var(--gold);font-style:normal}
-.loader-bar{width:300px;height:3px;background:var(--s3);border-radius:2px;overflow:hidden}
-.loader-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));border-radius:2px;animation:loadAnim 1.8s ease-in-out infinite}
-@keyframes loadAnim{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
-.loader-txt{font-family:var(--mono);font-size:11px;color:var(--muted2);letter-spacing:.5px}
-
-/* HEADER */
-.header{position:sticky;top:0;z-index:300;background:rgba(6,9,15,0.97);backdrop-filter:blur(24px);border-bottom:1px solid var(--border3);padding:0 28px;display:flex;align-items:center;gap:16px;height:62px;}
-.logo-mark{width:38px;height:38px;border-radius:8px;background:linear-gradient(145deg,#f5c518,#d48b00);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:20px;color:#000;flex-shrink:0;}
-.h-info{flex:1}
-.h-title{font-family:var(--display);font-size:22px;letter-spacing:1.5px;color:#fff;line-height:1}
-.h-title em{color:var(--gold);font-style:normal}
-.h-sub{font-family:var(--mono);font-size:10px;color:var(--muted2);letter-spacing:.6px;margin-top:2px}
-.h-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.live-badge{display:flex;align-items:center;gap:7px;background:rgba(31,212,122,.07);border:1px solid rgba(31,212,122,.22);border-radius:100px;padding:6px 14px;font-family:var(--mono);font-size:10px;color:var(--green);font-weight:500;letter-spacing:.4px;}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.last-update{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.3px}
-.refresh-btn{display:flex;align-items:center;gap:7px;background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.25);border-radius:8px;padding:7px 14px;font-family:var(--mono);font-size:10px;color:var(--gold);cursor:pointer;transition:all .15s;letter-spacing:.3px;}
-.refresh-btn:hover{background:rgba(245,197,24,.15)}
-.refresh-btn.spinning .refresh-ico{animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* COUNTDOWN */
-.countdown-wrap{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border2);border-radius:100px;padding:5px 14px;}
-.countdown-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.4px}
-.countdown-val{font-family:var(--display);font-size:18px;color:var(--gold);line-height:1;min-width:22px;text-align:center}
-.countdown-ring{width:22px;height:22px;flex-shrink:0}
-.countdown-ring circle{fill:none;stroke-width:2.5;stroke-linecap:round}
-.ring-bg{stroke:var(--s4)}
-.ring-fill{stroke:var(--gold);stroke-dasharray:57;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear;transform-origin:center;transform:rotate(-90deg)}
-
-/* MAIN */
-.main{padding:20px 28px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1}
-
-/* SECTION HEADERS */
-.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
-.sec-title{font-family:var(--display);font-size:13px;letter-spacing:2px;color:var(--muted3);border-left:3px solid var(--gold);padding-left:10px}
-.sec-note{font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--s2);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;letter-spacing:.3px}
-
-/* KPI GRID */
-.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.kpi-row-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.kpi{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:18px 16px 14px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s,border-color .2s;}
-.kpi:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(0,0,0,.5);border-color:var(--border3)}
-.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac)}
-.kpi-ico{font-size:18px;margin-bottom:8px;opacity:.7;display:block}
-.kpi-lbl{font-size:11px;font-weight:600;color:var(--muted3);margin-bottom:4px;line-height:1.35;letter-spacing:.2px}
-.kpi-val{font-family:var(--display);font-size:36px;color:var(--ac);line-height:1;letter-spacing:.5px}
-.kpi-sub{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px;line-height:1.4;border-top:1px solid var(--border);padding-top:6px}
-.kpi-sub b{color:var(--muted3)}
-
-/* CARDS */
-.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
-.card-hd{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid var(--border)}
-.card-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px;line-height:1.3}
-.card-desc{font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:3px;line-height:1.4}
-.tag{font-family:var(--mono);font-size:8px;font-weight:500;text-transform:uppercase;padding:3px 9px;border-radius:100px;letter-spacing:.5px;white-space:nowrap;flex-shrink:0}
-.tag-y{background:rgba(245,197,24,.1);color:var(--gold);border:1px solid rgba(245,197,24,.2)}
-.tag-g{background:rgba(13,232,199,.1);color:var(--teal);border:1px solid rgba(13,232,199,.2)}
-.tag-r{background:rgba(255,77,106,.1);color:var(--coral);border:1px solid rgba(255,77,106,.2)}
-.tag-b{background:rgba(58,180,245,.1);color:var(--sky);border:1px solid rgba(58,180,245,.2)}
-.tag-v{background:rgba(176,143,255,.1);color:var(--violet);border:1px solid rgba(176,143,255,.2)}
-.cw{padding:14px 16px;position:relative}
-
-/* GRID LAYOUTS */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.g4{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px}
-.g5{display:grid;grid-template-columns:3fr 2fr;gap:14px}
-
-/* TURNO BARS */
-.turno-row{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--border)}
-.t-col{padding:18px 20px;border-right:1px solid var(--border)}
-.t-col:last-child{border-right:none}
-.t-name{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.t-main-val{font-family:var(--display);font-size:36px;line-height:1;margin-bottom:2px}
-.t-main-lbl{font-size:11px;color:var(--muted3);font-weight:500;margin-bottom:12px}
-.t-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.t-metric{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
-.t-metric-val{font-family:var(--display);font-size:20px;line-height:1;margin-bottom:1px}
-.t-metric-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-.t-bar{height:3px;background:var(--s3);border-radius:2px;margin-top:4px;overflow:hidden}
-.t-fill{height:100%;border-radius:2px;transition:width .9s}
-
-/* PEAK BOXES */
-.peak-boxes{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 18px;border-top:1px solid var(--border)}
-.peak-box{border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
-.peak-box.high{background:rgba(13,232,199,.05);border:1px solid rgba(13,232,199,.2)}
-.peak-box.low{background:rgba(255,77,106,.05);border:1px solid rgba(255,77,106,.15)}
-.peak-ico{font-size:20px}
-.peak-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
-.peak-lbl.high{color:var(--teal)}
-.peak-lbl.low{color:var(--coral)}
-.peak-date{font-family:var(--display);font-size:22px;line-height:1;margin-top:2px}
-.peak-date.high{color:var(--teal)}
-.peak-date.low{color:var(--coral)}
-.peak-val{font-family:var(--mono);font-size:11px;margin-top:3px}
-
-/* TABLES */
-.tw{overflow-x:auto;max-height:380px;overflow-y:auto}
-.tw::-webkit-scrollbar{width:3px;height:3px}
-.tw::-webkit-scrollbar-track{background:transparent}
-.tw::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
-table{width:100%;border-collapse:collapse}
-thead{position:sticky;top:0;z-index:2;background:var(--s2)}
-thead tr{border-bottom:1px solid var(--border3)}
-th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted2);font-weight:500;padding:9px 13px;text-align:left;white-space:nowrap}
-td{padding:10px 13px;font-size:12px;color:var(--text);white-space:nowrap}
-tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
-tbody tr:hover{background:var(--s2)}
-tbody tr:last-child{border:none}
-.rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:9px;font-weight:700;background:var(--s3);color:var(--muted)}
-.rk1{background:rgba(245,197,24,.15);color:var(--gold)}
-.rk2{background:rgba(200,205,215,.08);color:#9fb0c0}
-.rk3{background:rgba(200,140,80,.1);color:#d49060}
-.mini-bg{height:5px;background:var(--s3);border-radius:3px;overflow:hidden;flex:1;min-width:50px}
-.mini-fill{height:100%;border-radius:3px;transition:width .6s}
-.he-badge-turno{font-family:var(--mono);font-size:9px;font-weight:500;padding:3px 8px;border-radius:100px;letter-spacing:.3px}
-.nd{padding:28px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px}
-
-/* PERSONAS */
-.personas-day-row{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--border);flex-wrap:wrap;align-items:center}
-.pday-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 16px;display:flex;flex-direction:column;align-items:center;gap:2px}
-.pday-val{font-family:var(--display);font-size:26px;line-height:1}
-.pday-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-
-/* ERROR */
-.err-box{background:rgba(255,77,106,.06);border:1px solid rgba(255,77,106,.2);border-radius:10px;padding:18px 20px;font-family:var(--mono);font-size:11px;color:var(--coral);line-height:1.7}
-.err-box strong{color:#ff6b85;display:block;margin-bottom:6px;font-size:13px}
-
-/* FOOTER */
-.footer{text-align:center;padding:18px;font-family:var(--mono);font-size:9px;color:var(--muted);border-top:1px solid var(--border);letter-spacing:.5px;position:relative;z-index:1;line-height:1.8}
-.footer em{color:var(--gold);font-style:normal}
-
-/* REFRESH BAR */
-.auto-refresh-bar{position:fixed;bottom:0;left:0;right:0;height:2px;background:transparent;z-index:500;overflow:hidden;}
-.auto-refresh-progress{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));transition:width 1s linear;}
-
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; overflow-x: hidden; min-height: 100vh; }
+#loader { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; transition: opacity .5s; }
+#loader.hide { opacity: 0; pointer-events: none; }
+.ld-logo { font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: 3px; color: var(--muted3); text-transform: uppercase; }
+.ld-logo span { color: var(--gold); }
+.ld-bar { width: 240px; height: 2px; background: var(--s3); border-radius: 2px; overflow: hidden; }
+.ld-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--teal)); animation: ldAnim 1.6s ease-in-out infinite; }
+@keyframes ldAnim { 0%{width:0;margin-left:0}50%{width:55%;margin-left:20%}100%{width:0;margin-left:100%} }
+.ld-txt { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .5px; }
+.header { position: sticky; top: 0; z-index: 200; background: rgba(8,12,18,0.96); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border2); padding: 0 24px; height: 58px; display: flex; align-items: center; gap: 14px; }
+.h-logo { width: 32px; height: 32px; border-radius: 7px; background: linear-gradient(135deg, var(--gold), #c08010); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 700; color: #000; flex-shrink: 0; }
+.h-text { flex: 1; }
+.h-title { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: .3px; line-height: 1.2; }
+.h-title em { color: var(--gold); font-style: normal; }
+.h-sub { font-family: var(--mono); font-size: 10px; color: var(--muted2); margin-top: 1px; letter-spacing: .3px; }
+.h-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.live-pill { display: flex; align-items: center; gap: 6px; background: rgba(34,197,94,.07); border: 1px solid rgba(34,197,94,.2); border-radius: 100px; padding: 5px 12px; font-family: var(--mono); font-size: 10px; color: var(--green); letter-spacing: .3px; }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.8s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.25} }
+.filter-bar { background: var(--s1); border-bottom: 1px solid var(--border); padding: 10px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.filter-label { font-family: var(--mono); font-size: 10px; color: var(--muted3); text-transform: uppercase; letter-spacing: .8px; white-space: nowrap; }
+.date-inputs { display: flex; align-items: center; gap: 8px; }
+.date-input { background: var(--s2); border: 1px solid var(--border2); border-radius: 7px; padding: 5px 10px; font-family: var(--mono); font-size: 11px; color: var(--text); cursor: pointer; outline: none; transition: border-color .15s; }
+.date-input:focus { border-color: var(--gold); }
+.date-sep { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.quick-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.qbtn { padding: 5px 11px; border-radius: 6px; border: 1px solid var(--border2); background: var(--s2); font-family: var(--mono); font-size: 10px; color: var(--muted3); cursor: pointer; letter-spacing: .3px; transition: all .15s; white-space: nowrap; }
+.qbtn:hover, .qbtn.active { background: rgba(240,180,41,.1); border-color: rgba(240,180,41,.35); color: var(--gold); }
+.filter-result { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--muted2); white-space: nowrap; }
+.filter-result span { color: var(--teal); font-weight: 600; }
+.main { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+.sh { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.sh-title { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.8px; color: var(--muted3); padding-left: 10px; border-left: 2px solid var(--gold); }
+.sh-note { font-family: var(--mono); font-size: 10px; color: var(--muted); background: var(--s1); border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.kpi-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.kpi { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 14px 12px; position: relative; overflow: hidden; transition: transform .2s, border-color .2s, box-shadow .2s; }
+.kpi:hover { transform: translateY(-2px); border-color: var(--border3); box-shadow: 0 12px 32px rgba(0,0,0,.4); }
+.kpi::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--ac, var(--gold)); }
+.kpi-icon { font-size: 16px; margin-bottom: 7px; display: block; opacity: .75; }
+.kpi-label { font-size: 11px; font-weight: 500; color: var(--muted3); margin-bottom: 3px; line-height: 1.3; }
+.kpi-value { font-family: var(--mono); font-size: 28px; font-weight: 700; color: var(--ac, var(--gold)); line-height: 1; letter-spacing: -1px; }
+.kpi-sub { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 7px; border-top: 1px solid var(--border); padding-top: 6px; line-height: 1.5; }
+.kpi-sub b { color: var(--muted3); }
+.card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.card-hd { display: flex; align-items: flex-start; justify-content: space-between; padding: 13px 16px 11px; border-bottom: 1px solid var(--border); }
+.card-title { font-size: 12px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 6px; line-height: 1.3; }
+.card-desc { font-family: var(--mono); font-size: 10px; color: var(--muted2); margin-top: 2px; }
+.tag { font-family: var(--mono); font-size: 8px; font-weight: 600; text-transform: uppercase; padding: 3px 8px; border-radius: 100px; letter-spacing: .5px; white-space: nowrap; }
+.tag-y { background: rgba(240,180,41,.1); color: var(--gold); border: 1px solid rgba(240,180,41,.2); }
+.tag-g { background: rgba(16,212,180,.1); color: var(--teal); border: 1px solid rgba(16,212,180,.2); }
+.tag-b { background: rgba(56,178,245,.1); color: var(--sky); border: 1px solid rgba(56,178,245,.2); }
+.tag-v { background: rgba(167,139,250,.1); color: var(--violet); border: 1px solid rgba(167,139,250,.2); }
+.tag-r { background: rgba(245,87,108,.1); color: var(--coral); border: 1px solid rgba(245,87,108,.2); }
+.cw { padding: 12px 14px; position: relative; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.g13 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+.g21 { display: grid; grid-template-columns: 3fr 2fr; gap: 12px; }
+.turno-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+.tb { padding: 16px 18px; border-right: 1px solid var(--border); }
+.tb:last-child { border-right: none; }
+.tb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.tb-name { font-family: var(--mono); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.4px; }
+.tb-big { font-family: var(--mono); font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -1.5px; }
+.tb-biglbl { font-size: 11px; color: var(--muted3); font-weight: 500; margin-bottom: 11px; }
+.tb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+.tb-metric { background: var(--s2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; }
+.tb-mv { font-family: var(--mono); font-size: 18px; font-weight: 700; line-height: 1; }
+.tb-ml { font-family: var(--mono); font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 1px; }
+.tb-bar { height: 2px; background: var(--s3); border-radius: 1px; overflow: hidden; margin-top: 8px; }
+.tb-fill { height: 100%; border-radius: 1px; transition: width .8s cubic-bezier(.4,0,.2,1); }
+.tb-pct { font-family: var(--mono); font-size: 9px; color: var(--muted); text-align: right; margin-top: 3px; }
+.peaks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.pk { border-radius: 8px; padding: 13px 14px; }
+.pk.hi { background: rgba(16,212,180,.04); border: 1px solid rgba(16,212,180,.18); }
+.pk.lo { background: rgba(245,87,108,.04); border: 1px solid rgba(245,87,108,.15); }
+.pk-label { font-family: var(--mono); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
+.pk.hi .pk-label { color: var(--teal); }
+.pk.lo .pk-label { color: var(--coral); }
+.pk-date { font-family: var(--mono); font-size: 20px; font-weight: 700; line-height: 1; }
+.pk.hi .pk-date { color: var(--teal); }
+.pk.lo .pk-date { color: var(--coral); }
+.pk-val { font-family: var(--mono); font-size: 11px; margin-top: 3px; color: var(--muted3); }
+.tw { overflow-x: auto; max-height: 360px; overflow-y: auto; }
+.tw::-webkit-scrollbar { width: 3px; height: 3px; }
+.tw::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 2px; }
+table { width: 100%; border-collapse: collapse; }
+thead { position: sticky; top: 0; z-index: 2; background: var(--s2); }
+thead tr { border-bottom: 1px solid var(--border3); }
+th { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted2); font-weight: 500; padding: 8px 12px; text-align: left; white-space: nowrap; }
+td { padding: 9px 12px; font-size: 12px; color: var(--text); white-space: nowrap; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:hover { background: var(--s2); }
+tbody tr:last-child { border: none; }
+.rk { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 8px; font-weight: 700; background: var(--s3); color: var(--muted); }
+.rk1 { background: rgba(240,180,41,.15); color: var(--gold); }
+.rk2 { background: rgba(203,213,225,.07); color: #9fb0c0; }
+.rk3 { background: rgba(200,140,80,.1); color: #d4905a; }
+.mini-bar { height: 4px; background: var(--s3); border-radius: 2px; overflow: hidden; flex: 1; min-width: 44px; }
+.mini-fill { height: 100%; border-radius: 2px; transition: width .5s; }
+.t-badge { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 100px; letter-spacing: .3px; }
+.empty { padding: 28px; text-align: center; color: var(--muted); font-family: var(--mono); font-size: 11px; }
+.psummary { display: flex; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
+.pb { background: var(--s2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.pb-val { font-family: var(--mono); font-size: 22px; font-weight: 700; line-height: 1; }
+.pb-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+#mvpCard { padding: 18px; }
+.mvp-avatar { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 20px; font-weight: 700; flex-shrink: 0; }
+.mvp-name { font-size: 16px; font-weight: 700; color: #fff; line-height: 1.2; }
+.mvp-sub { font-family: var(--mono); font-size: 10px; margin-top: 3px; }
+.mvp-trophy { display: inline-flex; align-items: center; gap: 5px; background: rgba(240,180,41,.1); border: 1px solid rgba(240,180,41,.25); border-radius: 100px; padding: 3px 10px; font-family: var(--mono); font-size: 9px; color: var(--gold); margin-top: 7px; }
+.mvp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 15px; }
+.mvp-stat { background: var(--s2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; }
+.mvp-sv { font-family: var(--mono); font-size: 24px; font-weight: 700; line-height: 1; }
+.mvp-sl { font-family: var(--mono); font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-top: 2px; }
+.prog-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 2px; z-index: 500; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--teal)); }
+footer { text-align: center; padding: 14px; font-family: var(--mono); font-size: 9px; color: var(--muted); border-top: 1px solid var(--border); letter-spacing: .5px; line-height: 1.8; }
+footer em { color: var(--gold); font-style: normal; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 2px; }
 </style>
 </head>
 <body>
-
 <div id="loader">
-  <div class="loader-logo">OPS <em>INNOVAPEP</em></div>
-  <div class="loader-bar"><div class="loader-fill"></div></div>
-  <div class="loader-txt" id="loaderTxt">Conectando con Google Sheets…</div>
+  <div class="ld-logo">OPS · <span>INNOVAPEP</span> · INLOTRANS</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+  <div class="ld-txt">Cargando datos del período...</div>
 </div>
-
 <header class="header">
-  <div class="logo-mark">IL</div>
-  <div class="h-info">
-    <div class="h-title">OPS <em>INLOTRANS</em> · <em>INNOVAPEP</em> — DASHBOARD CONSOLIDADO</div>
-    <div class="h-sub" id="headerSub">Logística & Operaciones · Cargando datos…</div>
+  <div class="h-logo">IL</div>
+  <div class="h-text">
+    <div class="h-title"><em>INLOTRANS</em> · <em>INNOVAPEP</em> — Dashboard Consolidado</div>
+    <div class="h-sub" id="hSub">Logística &amp; Operaciones · Cargando…</div>
   </div>
-  <div class="h-actions">
-    <div class="countdown-wrap">
-      <svg class="countdown-ring" viewBox="0 0 22 22">
-        <circle class="ring-bg" cx="11" cy="11" r="9"/>
-        <circle class="ring-fill" id="ringFill" cx="11" cy="11" r="9"/>
-      </svg>
-      <div>
-        <div class="countdown-lbl">PRÓXIMA SYNC</div>
-        <div class="countdown-val" id="countdownVal">30</div>
-      </div>
-    </div>
-    <span class="last-update" id="lastUpdate"></span>
-    <button class="refresh-btn" id="refreshBtn" onclick="loadData()">
-      <span class="refresh-ico">↻</span> Actualizar
-    </button>
-    <div class="live-badge"><span class="live-dot"></span>En Vivo</div>
-  </div>
+  <div class="h-right"><div class="live-pill"><span class="live-dot"></span>Datos Reales</div></div>
 </header>
-
+<div class="filter-bar">
+  <span class="filter-label">📅 Período</span>
+  <div class="date-inputs">
+    <input type="date" id="dateFrom" class="date-input" onchange="applyFilter()">
+    <span class="date-sep">→</span>
+    <input type="date" id="dateTo" class="date-input" onchange="applyFilter()">
+  </div>
+  <div class="quick-btns">
+    <button class="qbtn" onclick="setQuick('today',this)">Hoy</button>
+    <button class="qbtn" onclick="setQuick('week',this)">7 días</button>
+    <button class="qbtn" onclick="setQuick('month',this)">Mes actual</button>
+    <button class="qbtn active" onclick="setQuick('all',this)">Todo el período</button>
+  </div>
+  <div class="filter-result" id="filterResult">—</div>
+</div>
 <div class="main" id="mainContent">
-
-  <div class="sec-hd">
-    <div class="sec-title">📦 RESUMEN GENERAL — CAJAS, ESTIBAS Y OPERACIONES</div>
-    <div class="sec-note">Período completo · Todas las hojas</div>
-  </div>
-  <div class="kpi-row" id="kpiGeneral"></div>
-  <div class="kpi-row-5" id="kpiExtra"></div>
-
-  <div class="sec-hd">
-    <div class="sec-title">⏰ CAJAS Y ESTIBAS POR TURNO</div>
-    <div class="sec-note">T1 · T2 · T3 — Cargue · Descargue · Vinipelado</div>
-  </div>
+  <div class="sh"><div class="sh-title">📦 Resumen General</div><div class="sh-note" id="periodNote">—</div></div>
+  <div class="kpi-grid" id="kpiGeneral"></div>
+  <div class="kpi-grid-5" id="kpiExtra"></div>
+  <div class="sh"><div class="sh-title">⏰ Por Turno</div><div class="sh-note">T1 · T2 · T3</div></div>
   <div class="card">
     <div class="card-hd">
-      <div>
-        <div class="card-title">⏰ Detalle por Turno</div>
-        <div class="card-desc">Cajas, estibas y personas por cada turno</div>
-      </div>
-      <span class="tag tag-y">Cajas · Estibas · Personas</span>
+      <div><div class="card-title">⏰ Detalle por Turno</div><div class="card-desc">Cajas, estibas y personas activas en cada turno</div></div>
+      <span class="tag tag-y">3 Turnos</span>
     </div>
-    <div class="turno-row" id="turnoRow"></div>
+    <div class="turno-wrap" id="turnoWrap"></div>
   </div>
-
-  <div class="sec-hd">
-    <div class="sec-title">📈 TENDENCIA — CAJAS DIARIAS POR TURNO</div>
-    <div class="sec-note">Pico alto y pico bajo del período</div>
-  </div>
-  <div class="g4">
+  <div class="sh"><div class="sh-title">📈 Tendencia Diaria</div><div class="sh-note">Pico alto · Pico bajo</div></div>
+  <div class="g13">
     <div class="card">
       <div class="card-hd">
-        <div>
-          <div class="card-title">📈 Cajas Diarias por Turno</div>
-          <div class="card-desc">Tendencia de cajas cargadas y descargadas por fecha</div>
-        </div>
+        <div><div class="card-title">📈 Cajas por Día y Turno</div><div class="card-desc">Evolución diaria de cajas movilizadas</div></div>
         <span class="tag tag-g">Tendencia</span>
       </div>
-      <div class="cw" style="height:240px"><canvas id="chartTendencia"></canvas></div>
-      <div class="peak-boxes" id="peakBoxes"></div>
+      <div class="cw" style="height:230px"><canvas id="cTend"></canvas></div>
+      <div class="peaks" id="peaks"></div>
     </div>
     <div class="card">
-      <div class="card-hd">
-        <div>
-          <div class="card-title">📦 Cajas · Mix Actividad</div>
-          <div class="card-desc">Cargue vs Descargue</div>
-        </div>
-        <span class="tag tag-g">Mix</span>
-      </div>
-      <div class="cw" style="height:140px"><canvas id="chartDonut"></canvas></div>
-      <div style="padding:0 16px 14px;display:flex;flex-direction:column;gap:5px" id="donutLegend"></div>
+      <div class="card-hd"><div><div class="card-title">📦 Cajas — Cargue vs Descargue</div></div><span class="tag tag-g">Mix</span></div>
+      <div class="cw" style="height:130px"><canvas id="cDonut"></canvas></div>
+      <div style="padding:0 14px 12px;display:flex;flex-direction:column;gap:5px" id="donutLeg"></div>
     </div>
     <div class="card">
-      <div class="card-hd">
-        <div>
-          <div class="card-title">📐 Estibas · Mix Actividad</div>
-          <div class="card-desc">Cargue · Descargue · Vinipelado · Movest</div>
-        </div>
-        <span class="tag tag-b">Mix</span>
-      </div>
-      <div class="cw" style="height:140px"><canvas id="chartEstibas"></canvas></div>
-      <div style="padding:0 16px 14px;display:flex;flex-direction:column;gap:5px" id="estibasLegend"></div>
+      <div class="card-hd"><div><div class="card-title">📐 Estibas — Mix Actividad</div></div><span class="tag tag-b">Mix</span></div>
+      <div class="cw" style="height:130px"><canvas id="cEstibas"></canvas></div>
+      <div style="padding:0 14px 12px;display:flex;flex-direction:column;gap:5px" id="estibasLeg"></div>
     </div>
   </div>
-
-  <div class="sec-hd">
-    <div class="sec-title">👷 PERSONAS — POR DÍA Y TURNO</div>
-    <div class="sec-note">Top 10 operarios · Segmentado por turno</div>
-  </div>
+  <div class="sh"><div class="sh-title">👷 Operarios</div><div class="sh-note">Top 10 · Por día</div></div>
   <div class="card">
     <div class="card-hd">
-      <div>
-        <div class="card-title">👥 Personas activas por día</div>
-        <div class="card-desc">Personas registradas cada día, por turno</div>
-      </div>
+      <div><div class="card-title">👥 Personas activas por día</div><div class="card-desc">Personas únicas registradas cada día, segmentado por turno</div></div>
       <span class="tag tag-y">Por turno</span>
     </div>
-    <div class="cw" style="height:180px"><canvas id="chartPersonasDia"></canvas></div>
-    <div class="personas-day-row" id="personasDaySummary"></div>
+    <div class="cw" style="height:170px"><canvas id="cPersDia"></canvas></div>
+    <div class="psummary" id="persSummary"></div>
   </div>
-
-  <div class="g5">
+  <div class="g21">
     <div class="card">
       <div class="card-hd">
-        <div>
-          <div class="card-title">🏆 Top 10 — Operarios por Cajas Movilizadas</div>
-          <div class="card-desc">Personas que más cajas movieron en el período</div>
-        </div>
+        <div><div class="card-title">🏆 Top 10 — Operarios por Cajas Movilizadas</div><div class="card-desc">Personas que más cajas movieron en el período filtrado</div></div>
         <span class="tag tag-y">Top 10</span>
       </div>
-      <div class="cw" style="height:180px"><canvas id="chartOps"></canvas></div>
+      <div class="cw" style="height:170px"><canvas id="cOps"></canvas></div>
       <div class="tw">
-        <table>
-          <thead><tr><th>#</th><th>Operario</th><th>Turno</th><th>Cajas Mov.</th><th>Estibas</th><th>Días Act.</th><th style="width:90px">% del Top</th></tr></thead>
-          <tbody id="tbOps"></tbody>
-        </table>
+        <table><thead><tr><th>#</th><th>Operario</th><th>Turno</th><th>Cajas</th><th>Estibas</th><th>Días</th><th style="width:90px">% Top</th></tr></thead>
+        <tbody id="tbOps"></tbody></table>
       </div>
     </div>
     <div class="card">
       <div class="card-hd">
-        <div>
-          <div class="card-title">🥇 MVP del Período</div>
-          <div class="card-desc">Persona con más movimiento · Detalle completo</div>
-        </div>
+        <div><div class="card-title">🥇 MVP del Período</div><div class="card-desc">Operario con mayor volumen de cajas</div></div>
         <span class="tag tag-r">MVP</span>
       </div>
-      <div id="mvpCard" style="padding:20px"></div>
+      <div id="mvpCard"></div>
     </div>
   </div>
-
-  <div class="sec-hd">
-    <div class="sec-title">🚛 TOP 10 VEHÍCULOS — CAJAS Y ESTIBAS</div>
-    <div class="sec-note">Placa · Totales · Turno · Muelle</div>
-  </div>
+  <div class="sh"><div class="sh-title">🚛 Vehículos</div><div class="sh-note">Top 10 por placa</div></div>
   <div class="g2">
     <div class="card">
       <div class="card-hd">
-        <div>
-          <div class="card-title">🪪 Top 10 Vehículos — Por Cajas</div>
-          <div class="card-desc">Placa · Cajas · Estibas · Turno · Tiempo estimado</div>
-        </div>
-        <span class="tag tag-y">Placa · Volumen</span>
+        <div><div class="card-title">🪪 Top 10 Vehículos — Por Cajas</div><div class="card-desc">Placa · Cajas · Estibas · Turno · Tiempo estimado</div></div>
+        <span class="tag tag-y">Volumen</span>
       </div>
       <div class="tw">
-        <table>
-          <thead><tr><th>#</th><th>Placa</th><th>Cajas</th><th>Estibas</th><th>Operaciones</th><th>Turno(s)</th><th>Tiempo Est.</th><th style="width:80px">% Top</th></tr></thead>
-          <tbody id="tbVehs"></tbody>
-        </table>
+        <table><thead><tr><th>#</th><th>Placa</th><th>Cajas</th><th>Estibas</th><th>Ops</th><th>Turno(s)</th><th>T. Est.</th><th style="width:70px">% Top</th></tr></thead>
+        <tbody id="tbVehs"></tbody></table>
       </div>
     </div>
     <div class="card">
       <div class="card-hd">
-        <div>
-          <div class="card-title">📊 Top 10 Vehículos — Cajas Totales</div>
-          <div class="card-desc">Comparativo visual por placa</div>
-        </div>
-        <span class="tag tag-b">Cajas</span>
+        <div><div class="card-title">📊 Cajas por Vehículo</div><div class="card-desc">Comparativo visual — Top 10 placas</div></div>
+        <span class="tag tag-b">Gráfico</span>
       </div>
-      <div class="cw" style="height:310px"><canvas id="chartVehs"></canvas></div>
+      <div class="cw" style="height:300px"><canvas id="cVehs"></canvas></div>
     </div>
   </div>
-
-  <!-- VINIPELADO + MOVEST -->
-  <div class="sec-hd">
-    <div class="sec-title">🔧 VINIPELADO Y MOVIMIENTO DE ESTIBAS</div>
-    <div class="sec-note">Detalle de operaciones auxiliares</div>
-  </div>
+  <div class="sh"><div class="sh-title">🔧 Vinipelado y Movest</div><div class="sh-note">Operaciones auxiliares</div></div>
   <div class="g2">
     <div class="card">
       <div class="card-hd">
-        <div>
-          <div class="card-title">🎁 Vinipelado — Detalle por Turno</div>
-          <div class="card-desc">Estibas y cajas vinipeladas por turno y fecha</div>
-        </div>
+        <div><div class="card-title">🎁 Vinipelado — Estibas por turno y fecha</div></div>
         <span class="tag tag-v">Vinipelado</span>
       </div>
-      <div class="cw" style="height:200px"><canvas id="chartVinip"></canvas></div>
+      <div class="cw" style="height:190px"><canvas id="cVinip"></canvas></div>
     </div>
     <div class="card">
       <div class="card-hd">
-        <div>
-          <div class="card-title">🔄 Movimiento de Estibas (Movest)</div>
-          <div class="card-desc">Traslados internos de estibas entre muelles</div>
-        </div>
+        <div><div class="card-title">🔄 Movimiento de Estibas (Movest)</div><div class="card-desc">Traslados internos entre muelles</div></div>
         <span class="tag tag-b">Movest</span>
       </div>
-      <div class="tw" style="max-height:240px">
-        <table>
-          <thead><tr><th>Fecha</th><th>Turno</th><th>Coordinador</th><th>Origen</th><th>Destino</th><th>Estibas</th></tr></thead>
-          <tbody id="tbMovest"></tbody>
-        </table>
+      <div class="tw" style="max-height:230px">
+        <table><thead><tr><th>Fecha</th><th>Turno</th><th>Coordinador</th><th>Origen</th><th>Destino</th><th>Estibas</th></tr></thead>
+        <tbody id="tbMovest"></tbody></table>
       </div>
     </div>
   </div>
-
-  <div id="errorBox" style="display:none"></div>
-
 </div>
-
-<footer class="footer">
-  Dashboard Consolidado · <em>LORENA MEDINA</em> · <em>INLOTRANS / INNOVAPEP</em> · 2026<br>
-  Datos en tiempo real desde Google Sheets · Auto-actualización cada <em>30 segundos</em>
-</footer>
-
-<div class="auto-refresh-bar"><div class="auto-refresh-progress" id="autoBar"></div></div>
-
+<footer>Dashboard Consolidado · <em>LORENA MEDINA</em> · <em>INLOTRANS / INNOVAPEP</em> · 2026 · Datos reales mayo–junio 2026</footer>
+<div class="prog-bar"><div class="prog-fill" id="progFill" style="width:100%"></div></div>
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────
-const SRC_URL = 'https://script.google.com/macros/s/AKfycbyA85B1mv7KcgxKpf0rdT5Bw40uc3Fgf2cW5MxUrEJbWcDtJJx5G4P3jteifo5cinPi2g/exec';
-const REFRESH_SEC = 30;
+const DATA_B64 = "''' + data_b64 + '''";
 
-// ─── STATE ────────────────────────────────────────────────────────────────
-// DATA stores normalized arrays per sheet type
-let DATA = { cajas: [], estibas: [], vinipelado: [], movest: [], resumen: [] };
-let charts = {};
-let countdownTimer = null;
-let countdownSec = REFRESH_SEC;
-
-// ─── UTILS ────────────────────────────────────────────────────────────────
-Chart.defaults.color = '#4a6076';
-Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.color = '#607a96';
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
 Chart.defaults.font.size = 10;
-const GRID_COLOR = 'rgba(255,255,255,0.04)';
-const TT = { backgroundColor:'#111820', borderColor:'rgba(255,255,255,0.09)', borderWidth:1, padding:12, cornerRadius:8, titleColor:'#c8d6e8', bodyColor:'#5e7d99', titleFont:{size:11}, bodyFont:{size:10} };
-const TURNO_COLOR = { 'Turno 1':'#f5c518','Turno 2':'#3ab4f5','Turno 3':'#0de8c7' };
+const GRID = 'rgba(255,255,255,0.04)';
+const TT = { backgroundColor:'#111a28', borderColor:'rgba(255,255,255,0.09)', borderWidth:1, padding:10, cornerRadius:7, titleColor:'#cad5e2', bodyColor:'#607a96', titleFont:{size:11}, bodyFont:{size:10} };
+const TC = { 'Turno 1':'#f0b429', 'Turno 2':'#38b2f5', 'Turno 3':'#10d4b4' };
 
-const fmt  = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n);
-const fmtN = n => Number(n).toLocaleString('es-CO');
-function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`${r},${g},${b}`;}
-function avatarColor(name){const c=['#f5c518','#0de8c7','#3ab4f5','#b08fff','#1fd47a','#ff4d6a','#ff8c42'];let h=0;for(let ch of name)h=(h*31+ch.charCodeAt(0))&0xffffffff;return c[Math.abs(h)%c.length];}
+let RAW = { cajas:[], estibas:[], vinip:[], movest:[] };
+let FILTERED = { cajas:[], estibas:[], vinip:[], movest:[] };
+let charts = {};
 
-// ─── DATE PARSER ──────────────────────────────────────────────────────────
-// Handles: "23 de may de 2026, 10:10 a. m." / ISO datetime / "2026-05-23" / serial numbers
-function parseDate(val) {
-  if (!val) return '';
-  if (val instanceof Date) return val.toISOString().slice(0,10);
-  const s = String(val).trim();
-  // ISO or yyyy-mm-dd
-  const iso = s.match(/^(\d{4}-\d{2}-\d{2})/);
-  if (iso) return iso[1];
-  // Serial number (Excel)
-  if (/^\d{5,6}$/.test(s)) {
-    const d = new Date((parseInt(s) - 25569) * 86400 * 1000);
-    return d.toISOString().slice(0,10);
-  }
-  // "23 de may de 2026, …"
-  const MONTHS = {ene:'01',feb:'02',mar:'03',abr:'04',may:'05',jun:'06',jul:'07',ago:'08',sep:'09',oct:'10',nov:'11',dic:'12'};
-  const m = s.match(/(\d{1,2})\s+de\s+(\w{3})\s+de\s+(\d{4})/i);
-  if (m) {
-    const mon = MONTHS[m[2].toLowerCase()] || '01';
-    return `${m[3]}-${mon}-${m[1].padStart(2,'0')}`;
-  }
-  // dd/mm/yyyy
-  const slsh = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (slsh) return `${slsh[3]}-${slsh[2].padStart(2,'0')}-${slsh[1].padStart(2,'0')}`;
-  return '';
+async function loadEmbeddedData() {
+  const bin = atob(DATA_B64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const stream = new DecompressionStream('gzip');
+  const writer = stream.writable.getWriter();
+  writer.write(bytes); writer.close();
+  const reader = stream.readable.getReader();
+  const chunks = [];
+  while (true) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); }
+  const total = chunks.reduce((s,c) => s+c.length, 0);
+  const out = new Uint8Array(total);
+  let pos = 0;
+  for (const c of chunks) { out.set(c, pos); pos += c.length; }
+  return JSON.parse(new TextDecoder().decode(out));
 }
 
-// ─── PERSONAS PARSER ──────────────────────────────────────────────────────
-// "1. Juan Pérez (123456)\n2. Pedro López (-)" → ["Juan Pérez","Pedro López"]
-function parsePersonas(val) {
-  if (!val || String(val).trim() === '0') return [];
-  return String(val).split(/\n/).map(line => {
-    // Remove leading "1. " or "2. "
-    line = line.replace(/^\d+\.\s*/, '').trim();
-    // Remove cedula in parentheses
-    line = line.replace(/\s*\([^)]*\)\s*$/, '').trim();
-    return line;
-  }).filter(p => p && p.length > 1 && p !== '0' && p !== '-');
+function setQuick(q, btn) {
+  document.querySelectorAll('.qbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const today = new Date().toISOString().slice(0,10);
+  const fd = document.getElementById('dateFrom'), td = document.getElementById('dateTo');
+  if (q==='today') { fd.value=today; td.value=today; }
+  else if (q==='week') { const w=new Date(); w.setDate(w.getDate()-6); fd.value=w.toISOString().slice(0,10); td.value=today; }
+  else if (q==='month') { const m=new Date(); m.setDate(1); fd.value=m.toISOString().slice(0,10); td.value=today; }
+  else { fd.value=''; td.value=''; }
+  applyFilter();
 }
 
-// ─── DATA NORMALIZERS ─────────────────────────────────────────────────────
-function normalizeCajas(row) {
-  return {
-    fecha: parseDate(row['Fecha'] || row['fecha'] || ''),
-    turno: String(row['Turno'] || row['turno'] || 'Turno 1').trim(),
-    operacion: String(row['Operación'] || row['Operacion'] || row['operacion'] || '').trim(),
-    cantidad: parseFloat(String(row['Cant. Cajas'] || row['Cantidad'] || row['cantCajas'] || 0).replace(/[^\d.]/g,'')) || 0,
-    placa: String(row['Placa'] || row['placa'] || '').trim().toUpperCase(),
-    muelle: String(row['Muelle'] || row['muelle'] || '').trim(),
-    personas: parsePersonas(row['Personas'] || row['personas'] || ''),
-    coordinador: String(row['Coordinador'] || row['coordinador'] || '').trim(),
-    horaInicio: String(row['Hora Inicio'] || row['horaInicio'] || '').trim(),
-    horaFin: String(row['Hora Fin'] || row['horaFin'] || '').trim(),
-  };
+function applyFilter() {
+  const from = document.getElementById('dateFrom').value;
+  const to = document.getElementById('dateTo').value;
+  const filt = arr => arr.filter(r => { if (from && r.fecha < from) return false; if (to && r.fecha > to) return false; return true; });
+  FILTERED = { cajas:filt(RAW.cajas), estibas:filt(RAW.estibas), vinip:filt(RAW.vinip), movest:filt(RAW.movest) };
+  const tot = FILTERED.cajas.length+FILTERED.estibas.length+FILTERED.vinip.length+FILTERED.movest.length;
+  document.getElementById('filterResult').innerHTML = `<span>${tot.toLocaleString('es-CO')}</span> registros en período`;
+  render();
 }
 
-function normalizeEstibas(row) {
-  return {
-    fecha: parseDate(row['Fecha'] || row['fecha'] || ''),
-    turno: String(row['Turno'] || row['turno'] || 'Turno 1').trim(),
-    operacion: String(row['Operación'] || row['Operacion'] || row['operacion'] || '').trim(),
-    cantidad: parseFloat(String(row['Cant. Estibas'] || row['cantEstibas'] || row['Cantidad'] || 0).replace(/[^\d.]/g,'')) || 0,
-    placa: String(row['Placa'] || row['placa'] || '').trim().toUpperCase(),
-    muelle: String(row['Muelle'] || row['muelle'] || '').trim(),
-    personas: parsePersonas(row['Personas'] || row['personas'] || ''),
-    coordinador: String(row['Coordinador'] || row['coordinador'] || '').trim(),
-  };
+function setDefaultDates() {
+  const all = [...RAW.cajas,...RAW.estibas,...RAW.vinip,...RAW.movest].map(r=>r.fecha).filter(Boolean).sort();
+  if (!all.length) return;
+  document.getElementById('dateFrom').value = all[0];
+  document.getElementById('dateTo').value = all[all.length-1];
+  document.getElementById('periodNote').textContent = `${all[0]} → ${all[all.length-1]}`;
 }
 
-function normalizeVinip(row) {
-  return {
-    fecha: parseDate(row['Fecha'] || row['fecha'] || ''),
-    turno: String(row['Turno'] || row['turno'] || 'Turno 1').trim(),
-    estibas: parseFloat(String(row['Estibas Vinip.'] || row['estibas'] || row['Estibas'] || 0).replace(/[^\d.]/g,'')) || 0,
-    cajas: parseFloat(String(row['Cajas Vinip.'] || row['cajas'] || row['Cajas'] || 0).replace(/[^\d.]/g,'')) || 0,
-    placa: String(row['Placa'] || row['placa'] || '').trim().toUpperCase(),
-    muelle: String(row['Muelle'] || row['muelle'] || '').trim(),
-    personas: parsePersonas(row['Personas'] || row['personas'] || ''),
-  };
-}
-
-function normalizeMovest(row) {
-  return {
-    fecha: parseDate(row['Fecha'] || row['fecha'] || ''),
-    turno: String(row['Turno'] || row['turno'] || 'Turno 1').trim(),
-    cantidad: parseFloat(String(row['Cant. Estibas'] || row['cantEstibas'] || row['Cantidad'] || 0).replace(/[^\d.]/g,'')) || 0,
-    origen: String(row['Muelle Origen'] || row['muelleOrigen'] || '').trim(),
-    destino: String(row['Muelle Destino'] || row['muelleDestino'] || '').trim(),
-    coordinador: String(row['Coordinador'] || row['coordinador'] || '').trim(),
-    personas: parsePersonas(row['Personas'] || row['personas'] || ''),
-  };
-}
-
-// ─── RESPONSE PARSER ──────────────────────────────────────────────────────
-// The GAS endpoint may return:
-// A) Object with keys = sheet names, each key = array of row objects
-// B) Single flat array (legacy respaldo sheet format)
-// C) Array of arrays (header + rows)
-function parseResponse(raw) {
-  const result = { cajas: [], estibas: [], vinipelado: [], movest: [] };
-  if (!raw) return result;
-
-  // Check if it's an object with named sheets
-  if (!Array.isArray(raw) && typeof raw === 'object') {
-    // Look for known sheet keys (exact or partial match)
-    const keys = Object.keys(raw);
-    for (const key of keys) {
-      const arr = raw[key];
-      if (!Array.isArray(arr) || arr.length === 0) continue;
-      const lk = key.toLowerCase().replace(/[^a-z]/g,'');
-      if (lk.includes('caja') || lk.includes('resumen')) {
-        raw[key].forEach(r => { const n = normalizeCajas(r); if(n.fecha && n.cantidad > 0) result.cajas.push(n); });
-      } else if (lk.includes('estiba')) {
-        raw[key].forEach(r => { const n = normalizeEstibas(r); if(n.fecha && n.cantidad > 0) result.estibas.push(n); });
-      } else if (lk.includes('vinip')) {
-        raw[key].forEach(r => { const n = normalizeVinip(r); if(n.fecha) result.vinipelado.push(n); });
-      } else if (lk.includes('movest')) {
-        raw[key].forEach(r => { const n = normalizeMovest(r); if(n.fecha) result.movest.push(n); });
-      }
-    }
-    // If nothing mapped but there's a "data" key, try flat
-    if (result.cajas.length === 0 && raw.data) {
-      return parseResponse(raw.data);
-    }
-    return result;
-  }
-
-  // Flat array — check first row for type hint
-  if (Array.isArray(raw) && raw.length > 0) {
-    if (Array.isArray(raw[0])) {
-      // Array of arrays — convert using first row as headers
-      const headers = raw[0].map(h => String(h).trim());
-      const rows = raw.slice(1).map(row => {
-        const obj = {};
-        headers.forEach((h,i) => obj[h] = row[i]);
-        return obj;
-      });
-      return parseResponse({ Operaciones_Resumen: rows });
-    }
-    // Array of objects — detect by fields present
-    const sample = raw[0] || {};
-    const hasCajas = 'Cant. Cajas' in sample || 'cantCajas' in sample;
-    const hasEstibas = 'Cant. Estibas' in sample || 'cantEstibas' in sample;
-    const hasVinip = 'Estibas Vinip.' in sample || 'estibas' in sample;
-    const hasMovest = 'Muelle Origen' in sample || 'muelleOrigen' in sample;
-    const hasTipo = 'Tipo' in sample || 'tipo' in sample;
-    const hasMixed = 'Actividad' in sample || 'actividad' in sample;
-
-    if (hasMixed) {
-      // Legacy "respaldo" sheet with Actividad field
-      raw.forEach(r => {
-        const act = String(r['Actividad'] || r['actividad'] || '').toLowerCase();
-        const unidad = String(r['Unidad de Media'] || r['unidad'] || '').toLowerCase();
-        if (unidad.includes('caja') || act.includes('carga') || act.includes('descarga') || act.includes('cargue') || act.includes('descargue')) {
-          const n = {
-            fecha: parseDate(r['Fecha de Actividad'] || r['fecha'] || ''),
-            turno: String(r['Turno'] || 'Turno 1'),
-            operacion: act.includes('descarg') ? 'Descargue' : 'Cargue',
-            cantidad: parseFloat(String(r['Cantidades'] || r['cantidad'] || r['Cantidad'] || 0).replace(/[^\d.]/g,'')) || 0,
-            placa: String(r['Placa /Identificación'] || r['placa'] || '').trim().toUpperCase(),
-            personas: [],
-            muelle: '',
-          };
-          if (n.fecha && n.cantidad > 0) result.cajas.push(n);
-        }
-      });
-    } else if (hasTipo) {
-      raw.forEach(r => {
-        const tipo = String(r['Tipo'] || r['tipo'] || '').toLowerCase();
-        if (tipo === 'cajas') {
-          const n = normalizeCajas(r); if(n.fecha && n.cantidad > 0) result.cajas.push(n);
-        } else if (tipo === 'estibas') {
-          const n = normalizeEstibas(r); if(n.fecha && n.cantidad > 0) result.estibas.push(n);
-        } else if (tipo === 'vinipelado') {
-          const n = normalizeVinip(r); if(n.fecha) result.vinipelado.push(n);
-        } else if (tipo === 'movest') {
-          const n = normalizeMovest(r); if(n.fecha) result.movest.push(n);
-        }
-      });
-    } else if (hasCajas) {
-      raw.forEach(r => { const n = normalizeCajas(r); if(n.fecha && n.cantidad > 0) result.cajas.push(n); });
-    } else if (hasEstibas) {
-      raw.forEach(r => { const n = normalizeEstibas(r); if(n.fecha && n.cantidad > 0) result.estibas.push(n); });
-    } else if (hasVinip) {
-      raw.forEach(r => { const n = normalizeVinip(r); if(n.fecha) result.vinipelado.push(n); });
-    } else if (hasMovest) {
-      raw.forEach(r => { const n = normalizeMovest(r); if(n.fecha) result.movest.push(n); });
-    }
-  }
-  return result;
-}
-
-// ─── COUNTDOWN ────────────────────────────────────────────────────────────
-function startCountdown() {
-  if (countdownTimer) clearInterval(countdownTimer);
-  countdownSec = REFRESH_SEC;
-  const bar = document.getElementById('autoBar');
-  const ringFill = document.getElementById('ringFill');
-  const valEl = document.getElementById('countdownVal');
-  const circumference = 2 * Math.PI * 9;
-
-  countdownTimer = setInterval(() => {
-    countdownSec--;
-    valEl.textContent = countdownSec;
-    const pct = ((REFRESH_SEC - countdownSec) / REFRESH_SEC) * 100;
-    bar.style.width = pct + '%';
-    const offset = (countdownSec / REFRESH_SEC) * circumference;
-    ringFill.style.strokeDashoffset = circumference - offset;
-    if (countdownSec <= 5) { ringFill.style.stroke='var(--coral)'; valEl.style.color='var(--coral)'; }
-    else { ringFill.style.stroke='var(--gold)'; valEl.style.color='var(--gold)'; }
-    if (countdownSec <= 0) { clearInterval(countdownTimer); loadData(); }
-  }, 1000);
-}
-
-// ─── FETCH via JSONP ──────────────────────────────────────────────────────
-function fetchData() {
-  return new Promise(resolve => {
-    const cbName = 'gasCallback_' + Date.now();
-    let settled = false;
-    const settle = (data, err) => {
-      if (settled) return; settled = true;
-      clearTimeout(timeout);
-      delete window[cbName];
-      const s = document.getElementById('gasScript_main');
-      if (s) s.remove();
-      if (err) resolve({ ok: false, data: null, error: err });
-      else resolve({ ok: true, data: data });
-    };
-    const timeout = setTimeout(() => settle(null, 'Timeout 20s'), 20000);
-    window[cbName] = function(data) {
-      if (data && data.error) settle(null, data.error);
-      else settle(data, null);
-    };
-    const script = document.createElement('script');
-    script.id = 'gasScript_main';
-    const sep = SRC_URL.includes('?') ? '&' : '?';
-    script.src = SRC_URL + sep + 'callback=' + cbName;
-    script.onerror = () => {
-      // Fallback: try plain fetch
-      fetch(SRC_URL, { redirect: 'follow', mode: 'cors' })
-        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(json => settle(json, null))
-        .catch(e => settle(null, e.message));
-    };
-    document.head.appendChild(script);
-  });
-}
-
-// ─── LOAD ─────────────────────────────────────────────────────────────────
-async function loadData() {
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('spinning');
-  document.getElementById('loaderTxt').textContent = 'Actualizando datos desde Google Sheets…';
-
-  const res = await fetchData();
-  let parsed = null;
-
-  if (res.ok && res.data) {
-    try {
-      parsed = parseResponse(res.data);
-      // Only update if we got meaningful data
-      if (parsed.cajas.length > 0 || parsed.estibas.length > 0 || parsed.vinipelado.length > 0) {
-        DATA = parsed;
-        document.getElementById('errorBox').style.display = 'none';
-      }
-    } catch(e) {
-      console.error('Parse error:', e);
-    }
-  }
-
-  const hasData = DATA.cajas.length > 0 || DATA.estibas.length > 0;
-
-  if (!hasData && !res.ok) {
-    showError(res.error || 'No se pudo conectar con el servidor');
-  }
-
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const dateStr = now.toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});
-  const total = DATA.cajas.length + DATA.estibas.length + DATA.vinipelado.length + DATA.movest.length;
-  document.getElementById('headerSub').textContent =
-    `Logística & Operaciones · ${total} registros (${DATA.cajas.length} cajas · ${DATA.estibas.length} estibas · ${DATA.vinipelado.length} vinip · ${DATA.movest.length} movest) · Sync: ${timeStr}`;
-  document.getElementById('lastUpdate').textContent = `Última sync: ${timeStr}`;
-
-  if (hasData) render();
-  hideLoader();
-  btn.classList.remove('spinning');
-  startCountdown();
-}
-
-function hideLoader(){
-  const l = document.getElementById('loader');
-  l.classList.add('hide');
-  setTimeout(() => l.style.display = 'none', 600);
-}
-
-function showError(msg) {
-  const box = document.getElementById('errorBox');
-  box.style.display = 'block';
-  box.innerHTML = `<div class="err-box"><strong>⚠️ Error al cargar datos</strong>${msg}<br><br>
-    <span style="color:var(--muted2)">El dashboard se actualizará automáticamente en ${REFRESH_SEC}s. Si el problema persiste,
-    verifica que el script de Apps Script esté publicado como "Accesible para cualquier usuario".</span></div>`;
-}
-
-// ─── CHART FACTORY ────────────────────────────────────────────────────────
-function mkChart(id, type, data, options) {
-  if (charts[id]) charts[id].destroy();
-  const ctx = document.getElementById(id);
-  if (!ctx) return;
-  charts[id] = new Chart(ctx, { type, data, options });
-}
-
-// ─── COMPUTE ──────────────────────────────────────────────────────────────
 function compute() {
-  const cajas = DATA.cajas.filter(r => r.fecha);
-  const estibas = DATA.estibas.filter(r => r.fecha);
-  const vinip = DATA.vinipelado.filter(r => r.fecha);
-  const movest = DATA.movest.filter(r => r.fecha);
+  const { cajas, estibas, vinip, movest } = FILTERED;
+  const totCaj = cajas.reduce((a,r)=>a+r.cantidad,0);
+  const cajC = cajas.filter(r=>r.operacion==='Cargue').reduce((a,r)=>a+r.cantidad,0);
+  const cajD = cajas.filter(r=>r.operacion==='Descargue').reduce((a,r)=>a+r.cantidad,0);
+  const totEst = estibas.reduce((a,r)=>a+r.cantidad,0);
+  const estC = estibas.filter(r=>r.operacion==='Cargue').reduce((a,r)=>a+r.cantidad,0);
+  const estD = estibas.filter(r=>r.operacion==='Descargue').reduce((a,r)=>a+r.cantidad,0);
+  const totVinipEst = vinip.reduce((a,r)=>a+r.estibas,0);
+  const totVinipCaj = vinip.reduce((a,r)=>a+r.cajas,0);
+  const totMovest = movest.reduce((a,r)=>a+r.cantidad,0);
 
-  // ── Cajas totales ──
-  const totalCajas = cajas.reduce((a,r) => a + r.cantidad, 0);
-  const cajCargue = cajas.filter(r => r.operacion === 'Cargue').reduce((a,r) => a + r.cantidad, 0);
-  const cajDesc = cajas.filter(r => r.operacion === 'Descargue').reduce((a,r) => a + r.cantidad, 0);
-
-  // ── Estibas totales ──
-  const totalEstibas = estibas.reduce((a,r) => a + r.cantidad, 0);
-  const estCargue = estibas.filter(r => r.operacion === 'Cargue').reduce((a,r) => a + r.cantidad, 0);
-  const estDesc = estibas.filter(r => r.operacion === 'Descargue').reduce((a,r) => a + r.cantidad, 0);
-
-  // ── Vinipelado ──
-  const totalVinipEst = vinip.reduce((a,r) => a + r.estibas, 0);
-  const totalVinipCaj = vinip.reduce((a,r) => a + r.cajas, 0);
-
-  // ── Movest ──
-  const totalMovest = movest.reduce((a,r) => a + r.cantidad, 0);
-
-  // ── Por turno ──
-  const turnoStats = {};
+  const TS = {};
   ['Turno 1','Turno 2','Turno 3'].forEach(t => {
-    const tc = cajas.filter(r => r.turno === t);
-    const te = estibas.filter(r => r.turno === t);
-    const tv = vinip.filter(r => r.turno === t);
-    const personasSet = new Set([
-      ...tc.flatMap(r => r.personas),
-      ...te.flatMap(r => r.personas),
-      ...tv.flatMap(r => r.personas),
-    ].filter(p => p && p.length > 1));
-    turnoStats[t] = {
-      cajas: tc.reduce((a,r) => a+r.cantidad,0),
-      cajC: tc.filter(r=>r.operacion==='Cargue').reduce((a,r)=>a+r.cantidad,0),
-      cajD: tc.filter(r=>r.operacion==='Descargue').reduce((a,r)=>a+r.cantidad,0),
-      est: te.reduce((a,r)=>a+r.cantidad,0),
-      estC: te.filter(r=>r.operacion==='Cargue').reduce((a,r)=>a+r.cantidad,0),
-      estD: te.filter(r=>r.operacion==='Descargue').reduce((a,r)=>a+r.cantidad,0),
-      vinipEst: tv.reduce((a,r)=>a+r.estibas,0),
-      personas: personasSet.size,
-    };
+    const tc=cajas.filter(r=>r.turno===t), te=estibas.filter(r=>r.turno===t), tv=vinip.filter(r=>r.turno===t);
+    const pset=new Set([...tc.flatMap(r=>r.personas),...te.flatMap(r=>r.personas),...tv.flatMap(r=>r.personas)].filter(p=>p&&p.length>1));
+    TS[t]={ cajas:tc.reduce((a,r)=>a+r.cantidad,0), cajC:tc.filter(r=>r.operacion==='Cargue').reduce((a,r)=>a+r.cantidad,0), cajD:tc.filter(r=>r.operacion==='Descargue').reduce((a,r)=>a+r.cantidad,0), est:te.reduce((a,r)=>a+r.cantidad,0), estC:te.filter(r=>r.operacion==='Cargue').reduce((a,r)=>a+r.cantidad,0), estD:te.filter(r=>r.operacion==='Descargue').reduce((a,r)=>a+r.cantidad,0), vinipEst:tv.reduce((a,r)=>a+r.estibas,0), pers:pset.size };
   });
 
-  // ── Dates ──
-  const allDates = [...new Set([
-    ...cajas.map(r=>r.fecha),
-    ...estibas.map(r=>r.fecha),
-    ...vinip.map(r=>r.fecha),
-  ].filter(Boolean))].sort();
-
-  // ── Daily breakdown ──
-  const daily = {};
-  allDates.forEach(d => {
-    daily[d] = {
-      total:0, cargue:0, desc:0,
-      byTurno:{'Turno 1':0,'Turno 2':0,'Turno 3':0},
-      personas: new Set(),
-      personasByTurno: {'Turno 1':new Set(),'Turno 2':new Set(),'Turno 3':new Set()},
-    };
+  const dates=[...new Set([...cajas.map(r=>r.fecha),...estibas.map(r=>r.fecha),...vinip.map(r=>r.fecha)].filter(Boolean))].sort();
+  const daily={};
+  dates.forEach(d=>{daily[d]={total:0,cajC:0,cajD:0,byT:{'Turno 1':0,'Turno 2':0,'Turno 3':0},pers:new Set(),persT:{'Turno 1':new Set(),'Turno 2':new Set(),'Turno 3':new Set()}};});
+  cajas.forEach(r=>{
+    if(!daily[r.fecha])return;
+    daily[r.fecha].total+=r.cantidad;
+    if(r.operacion==='Cargue')daily[r.fecha].cajC+=r.cantidad; else daily[r.fecha].cajD+=r.cantidad;
+    daily[r.fecha].byT[r.turno]=(daily[r.fecha].byT[r.turno]||0)+r.cantidad;
+    r.personas.forEach(p=>{daily[r.fecha].pers.add(p);daily[r.fecha].persT[r.turno].add(p);});
   });
+  estibas.forEach(r=>{if(!daily[r.fecha])return;r.personas.forEach(p=>{daily[r.fecha].pers.add(p);daily[r.fecha].persT[r.turno].add(p);});});
 
-  cajas.forEach(r => {
-    if (!daily[r.fecha]) return;
-    daily[r.fecha].total += r.cantidad;
-    if (r.operacion==='Cargue') daily[r.fecha].cargue += r.cantidad;
-    if (r.operacion==='Descargue') daily[r.fecha].desc += r.cantidad;
-    daily[r.fecha].byTurno[r.turno] = (daily[r.fecha].byTurno[r.turno] || 0) + r.cantidad;
-    r.personas.forEach(p => {
-      daily[r.fecha].personas.add(p);
-      daily[r.fecha].personasByTurno[r.turno].add(p);
+  let maxDay={fecha:'',val:0},minDay={fecha:'',val:Infinity};
+  dates.forEach(d=>{const v=daily[d].total;if(v>maxDay.val)maxDay={fecha:d,val:v};if(v>0&&v<minDay.val)minDay={fecha:d,val:v};});
+  if(minDay.val===Infinity)minDay={fecha:'—',val:0};
+
+  const pmap={};
+  [...cajas,...estibas,...vinip].forEach(r=>{
+    const isV='estibas'in r&&!('operacion'in r);
+    r.personas.forEach(p=>{
+      if(!p||p.length<2)return;
+      if(!pmap[p])pmap[p]={cajas:0,estibas:0,ops:0,turnos:{},fechas:new Set()};
+      pmap[p].ops++;pmap[p].fechas.add(r.fecha);
+      if(!pmap[p].turnos[r.turno])pmap[p].turnos[r.turno]=0;
+      pmap[p].turnos[r.turno]++;
+      if(!isV&&r.operacion)pmap[p].cajas+=r.cantidad||0;
+      else if(isV)pmap[p].estibas+=r.estibas||0;
+      else pmap[p].estibas+=r.cantidad||0;
     });
   });
-  estibas.forEach(r => {
-    if (!daily[r.fecha]) return;
-    r.personas.forEach(p => {
-      daily[r.fecha].personas.add(p);
-      daily[r.fecha].personasByTurno[r.turno].add(p);
-    });
+  const personas=Object.entries(pmap).map(([name,s])=>({name,cajas:s.cajas,estibas:s.estibas,ops:s.ops,dias:s.fechas.size,mainT:Object.entries(s.turnos).sort((a,b)=>b[1]-a[1])[0]?.[0]||'N/A'})).sort((a,b)=>b.cajas-a.cajas);
+
+  const vmap={};
+  [...cajas,...estibas].forEach(r=>{
+    if(!r.placa||r.placa==='-'||r.placa==='NAN')return;
+    if(!vmap[r.placa])vmap[r.placa]={cajas:0,est:0,ops:0,turnos:new Set()};
+    vmap[r.placa].ops++;vmap[r.placa].turnos.add(r.turno);
+    if(r.operacion!==undefined)vmap[r.placa].cajas+=r.cantidad||0;
+    else vmap[r.placa].est+=r.cantidad||0;
   });
+  const vehs=Object.entries(vmap).map(([p,s])=>({placa:p,cajas:s.cajas,est:s.est,ops:s.ops,turnos:[...s.turnos],hrsEst:Math.round(Math.max(0.5,s.cajas/500)*10)/10})).sort((a,b)=>b.cajas-a.cajas);
 
-  // ── Peaks ──
-  let maxDay={fecha:'',val:0}, minDay={fecha:'',val:Infinity};
-  allDates.forEach(d => {
-    const v = daily[d].total;
-    if (v > maxDay.val) maxDay = {fecha:d, val:v};
-    if (v > 0 && v < minDay.val) minDay = {fecha:d, val:v};
-  });
-  if (minDay.val === Infinity) minDay = {fecha:'—', val:0};
+  const vdates=[...new Set(vinip.map(r=>r.fecha).filter(Boolean))].sort();
+  const vdaily={};
+  vdates.forEach(d=>vdaily[d]={'Turno 1':0,'Turno 2':0,'Turno 3':0});
+  vinip.forEach(r=>{if(!vdaily[r.fecha])return;vdaily[r.fecha][r.turno]=(vdaily[r.fecha][r.turno]||0)+r.estibas;});
 
-  // ── Personas map ──
-  const personaMap = {};
-  [...cajas,...estibas,...vinip].forEach(r => {
-    const isCajas = 'operacion' in r && !('estibas' in r);
-    const isVinip = 'estibas' in r;
-    r.personas.forEach(p => {
-      if (!personaMap[p]) personaMap[p] = {cajas:0, estibas:0, ops:0, turnos:{}, fechas:new Set()};
-      personaMap[p].ops++;
-      personaMap[p].fechas.add(r.fecha);
-      if (!personaMap[p].turnos[r.turno]) personaMap[p].turnos[r.turno] = 0;
-      personaMap[p].turnos[r.turno]++;
-      if (isCajas) personaMap[p].cajas += r.cantidad;
-      else if (isVinip) personaMap[p].estibas += (r.estibas || 0);
-      else personaMap[p].estibas += r.cantidad;
-    });
-  });
-
-  const personas = Object.entries(personaMap).map(([name,s]) => {
-    const mainTurno = Object.entries(s.turnos).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A';
-    return { name, ...s, mainTurno, diasActivos: s.fechas.size };
-  }).sort((a,b) => b.cajas - a.cajas);
-
-  // ── Vehículos ──
-  const vehMap = {};
-  [...cajas,...estibas].forEach(r => {
-    if (!r.placa) return;
-    const k = r.placa;
-    if (!vehMap[k]) vehMap[k] = {cajas:0, est:0, ops:0, turnos:new Set()};
-    vehMap[k].ops++;
-    vehMap[k].turnos.add(r.turno);
-    if ('operacion' in r && !('estibas' in r)) vehMap[k].cajas += r.cantidad;
-    else vehMap[k].est += r.cantidad;
-  });
-  const vehs = Object.entries(vehMap).map(([p,s]) => ({
-    placa:p, ...s,
-    turnos: [...s.turnos],
-    hrsEst: Math.max(0.5, Math.round(s.cajas/500 * 10)/10)
-  })).sort((a,b) => b.cajas - a.cajas);
-
-  // ── Vinipelado por fecha/turno ──
-  const vinipDates = [...new Set(vinip.map(r=>r.fecha).filter(Boolean))].sort();
-  const vinipDaily = {};
-  vinipDates.forEach(d => { vinipDaily[d] = {'Turno 1':0,'Turno 2':0,'Turno 3':0}; });
-  vinip.forEach(r => {
-    if (!vinipDaily[r.fecha]) return;
-    vinipDaily[r.fecha][r.turno] = (vinipDaily[r.fecha][r.turno]||0) + r.estibas;
-  });
-
-  return {
-    totalCajas, cajCargue, cajDesc,
-    totalEstibas, estCargue, estDesc,
-    totalVinipEst, totalVinipCaj, totalMovest,
-    turnoStats, allDates, daily, personas, vehs,
-    maxDay, minDay, vinipDates, vinipDaily,
-    movest,
-    // persona counts
-    totalPersonas: Object.keys(personaMap).length,
-    t1Personas: [...new Set(cajas.filter(r=>r.turno==='Turno 1').flatMap(r=>r.personas).filter(p=>p&&p.length>1))].length,
-    t2Personas: [...new Set(cajas.filter(r=>r.turno==='Turno 2').flatMap(r=>r.personas).filter(p=>p&&p.length>1))].length,
-    t3Personas: [...new Set(cajas.filter(r=>r.turno==='Turno 3').flatMap(r=>r.personas).filter(p=>p&&p.length>1))].length,
-  };
+  const uniqT=t=>[...new Set(cajas.filter(r=>r.turno===t).flatMap(r=>r.personas).filter(p=>p&&p.length>1))].length;
+  return { totCaj,cajC,cajD,totEst,estC,estD,totVinipEst,totVinipCaj,totMovest,TS,dates,daily,personas,vehs,maxDay,minDay,vdates,vdaily,movest,totalPersonas:Object.keys(pmap).length,t1P:uniqT('Turno 1'),t2P:uniqT('Turno 2'),t3P:uniqT('Turno 3') };
 }
 
-// ─── RENDER ───────────────────────────────────────────────────────────────
+const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':String(n);
+const fmtN=n=>Number(n).toLocaleString('es-CO');
+function hex2rgb(h){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return`${r},${g},${b}`;}
+function avatarClr(n){const c=['#f0b429','#10d4b4','#38b2f5','#a78bfa','#22c55e','#f5576c','#fb923c'];let h=0;for(const ch of n)h=(h*31+ch.charCodeAt(0))&0xffffffff;return c[Math.abs(h)%c.length];}
+function shortDate(d){return d&&d.length>=7?d.slice(5).replace('-','/'):'—';}
+function mkChart(id,type,data,opts){if(charts[id])charts[id].destroy();const el=document.getElementById(id);if(!el)return;charts[id]=new Chart(el,{type,data,options:opts});}
+
 function render() {
-  const C = compute();
-  renderKPIs(C);
-  renderKPIExtra(C);
-  renderTurnoRow(C);
-  renderTendencia(C);
-  renderDonut(C);
-  renderEstibas(C);
-  renderPeak(C);
-  renderPersonasDia(C);
-  renderOps(C);
-  renderMVP(C);
-  renderVehs(C);
-  renderVehChart(C);
-  renderVinip(C);
-  renderMovest(C);
+  const C=compute();
+  rKPI(C);rKPIExtra(C);rTurno(C);rTend(C);rDonut(C);rEstibasMix(C);rPeaks(C);
+  rPersDia(C);rOps(C);rMVP(C);rVehs(C);rVehChart(C);rVinip(C);rMovest(C);
 }
 
-function renderKPIs(C) {
-  const pctC = C.totalCajas ? Math.round(C.cajCargue/C.totalCajas*100) : 0;
-  const pctD = C.totalCajas ? Math.round(C.cajDesc/C.totalCajas*100) : 0;
-  const kpis = [
-    {ac:'#f5c518',ico:'📦',lbl:'Total Cajas Movilizadas',val:fmt(C.totalCajas),sub:`<b>${fmtN(C.cajCargue)}</b> cargadas · <b>${fmtN(C.cajDesc)}</b> descargadas`},
-    {ac:'#0de8c7',ico:'🚛',lbl:'Cajas Cargadas',val:fmt(C.cajCargue),sub:`<b>${pctC}%</b> del total · Cargue`},
-    {ac:'#ff4d6a',ico:'⬇️',lbl:'Cajas Descargadas',val:fmt(C.cajDesc),sub:`<b>${pctD}%</b> del total · Descargue`},
-    {ac:'#3ab4f5',ico:'📐',lbl:'Estibas C/D Movilizadas',val:fmtN(C.totalEstibas),sub:`Cargue <b>${fmtN(C.estCargue)}</b> · Desc <b>${fmtN(C.estDesc)}</b>`},
-  ];
-  document.getElementById('kpiGeneral').innerHTML = kpis.map(k=>`
-    <div class="kpi" style="--ac:${k.ac}">
-      <span class="kpi-ico">${k.ico}</span>
-      <div class="kpi-lbl">${k.lbl}</div>
-      <div class="kpi-val">${k.val}</div>
-      <div class="kpi-sub">${k.sub}</div>
-    </div>`).join('');
+function rKPI(C){
+  const pctC=C.totCaj?Math.round(C.cajC/C.totCaj*100):0;
+  document.getElementById('kpiGeneral').innerHTML=[
+    {ac:'#f0b429',ico:'📦',lbl:'Total Cajas Movilizadas',val:fmt(C.totCaj),sub:`<b>${fmtN(C.cajC)}</b> cargadas · <b>${fmtN(C.cajD)}</b> descargadas`},
+    {ac:'#10d4b4',ico:'🚛',lbl:'Cajas Cargadas',val:fmt(C.cajC),sub:`<b>${pctC}%</b> del total`},
+    {ac:'#f5576c',ico:'⬇️',lbl:'Cajas Descargadas',val:fmt(C.cajD),sub:`<b>${100-pctC}%</b> del total`},
+    {ac:'#38b2f5',ico:'📐',lbl:'Estibas C/D Movilizadas',val:fmtN(C.totEst),sub:`Cargue <b>${fmtN(C.estC)}</b> · Desc <b>${fmtN(C.estD)}</b>`},
+  ].map(k=>`<div class="kpi" style="--ac:${k.ac}"><span class="kpi-icon">${k.ico}</span><div class="kpi-label">${k.lbl}</div><div class="kpi-value">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
 }
 
-function renderKPIExtra(C) {
-  const kpis = [
-    {ac:'#b08fff',ico:'🎁',lbl:'Estibas Vinipeladas',val:fmtN(C.totalVinipEst),sub:`Cajas vinip: <b>${fmtN(C.totalVinipCaj)}</b>`},
-    {ac:'#ff8c42',ico:'🔄',lbl:'Estibas Movidas (Movest)',val:fmtN(C.totalMovest),sub:`Traslados internos entre muelles`},
-    {ac:'#1fd47a',ico:'👷',lbl:'Operarios Únicos',val:fmtN(C.totalPersonas),sub:`T1: <b>${C.t1Personas}</b> · T2: <b>${C.t2Personas}</b> · T3: <b>${C.t3Personas}</b>`},
-    {ac:'#f5c518',ico:'📅',lbl:'Días con Actividad',val:C.allDates.length,sub:`Período: <b>${C.allDates[0]||'—'}</b> → <b>${C.allDates[C.allDates.length-1]||'—'}</b>`},
-    {ac:'#3ab4f5',ico:'🏭',lbl:'Total Operaciones',val:fmtN(DATA.cajas.length+DATA.estibas.length+DATA.vinipelado.length+DATA.movest.length),sub:`Cajas: ${DATA.cajas.length} · Est: ${DATA.estibas.length} · Vinip: ${DATA.vinipelado.length} · Movest: ${DATA.movest.length}`},
-  ];
-  document.getElementById('kpiExtra').innerHTML = kpis.map(k=>`
-    <div class="kpi" style="--ac:${k.ac}">
-      <span class="kpi-ico">${k.ico}</span>
-      <div class="kpi-lbl">${k.lbl}</div>
-      <div class="kpi-val">${k.val}</div>
-      <div class="kpi-sub">${k.sub}</div>
-    </div>`).join('');
+function rKPIExtra(C){
+  const n=FILTERED.cajas.length+FILTERED.estibas.length+FILTERED.vinip.length+FILTERED.movest.length;
+  document.getElementById('kpiExtra').innerHTML=[
+    {ac:'#a78bfa',ico:'🎁',lbl:'Estibas Vinipeladas',val:fmtN(C.totVinipEst),sub:`Cajas vinip: <b>${fmtN(C.totVinipCaj)}</b>`},
+    {ac:'#fb923c',ico:'🔄',lbl:'Movest (Estibas)',val:fmtN(C.totMovest),sub:`Traslados entre muelles`},
+    {ac:'#22c55e',ico:'👷',lbl:'Operarios Únicos',val:fmtN(C.totalPersonas),sub:`T1·<b>${C.t1P}</b> T2·<b>${C.t2P}</b> T3·<b>${C.t3P}</b>`},
+    {ac:'#f0b429',ico:'📅',lbl:'Días con Actividad',val:C.dates.length,sub:`<b>${C.dates[0]||'—'}</b> → <b>${C.dates[C.dates.length-1]||'—'}</b>`},
+    {ac:'#38b2f5',ico:'📋',lbl:'Registros en Filtro',val:fmtN(n),sub:`Cajas·${FILTERED.cajas.length} Est·${FILTERED.estibas.length} Vin·${FILTERED.vinip.length}`},
+  ].map(k=>`<div class="kpi" style="--ac:${k.ac}"><span class="kpi-icon">${k.ico}</span><div class="kpi-label">${k.lbl}</div><div class="kpi-value">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
 }
 
-function renderTurnoRow(C) {
-  const ts = ['Turno 1','Turno 2','Turno 3'];
-  const maxT = Math.max(...ts.map(t=>C.turnoStats[t]?.cajas||0));
-  const names = {'Turno 1':'T1 · 6am – 7pm','Turno 2':'T2 · Mixto','Turno 3':'T3 · 7pm – 6am'};
-  document.getElementById('turnoRow').innerHTML = ts.map(t => {
-    const s = C.turnoStats[t] || {cajas:0,cajC:0,cajD:0,est:0,estC:0,estD:0,vinipEst:0,personas:0};
-    const pct = maxT ? Math.round(s.cajas/maxT*100) : 0;
-    const color = TURNO_COLOR[t];
-    return `<div class="t-col">
-      <div class="t-name" style="color:${color}">⏰ ${names[t]}</div>
-      <div class="t-main-val" style="color:${color}">${fmtN(s.cajas)}</div>
-      <div class="t-main-lbl">cajas movilizadas</div>
-      <div class="t-metrics">
-        <div class="t-metric"><div class="t-metric-val" style="color:var(--teal)">${fmtN(s.cajC)}</div><div class="t-metric-lbl">Cajas Cargadas</div></div>
-        <div class="t-metric"><div class="t-metric-val" style="color:var(--coral)">${fmtN(s.cajD)}</div><div class="t-metric-lbl">Cajas Descarg.</div></div>
-        <div class="t-metric"><div class="t-metric-val" style="color:var(--sky)">${fmtN(s.est)}</div><div class="t-metric-lbl">Estibas C/D</div></div>
-        <div class="t-metric"><div class="t-metric-val" style="color:var(--violet)">${fmtN(s.vinipEst)}</div><div class="t-metric-lbl">Estibas Vinip.</div></div>
-        <div class="t-metric"><div class="t-metric-val" style="color:var(--muted3)">${fmtN(s.estC)}</div><div class="t-metric-lbl">Est. Carg.</div></div>
-        <div class="t-metric"><div class="t-metric-val" style="color:var(--gold)">${s.personas}</div><div class="t-metric-lbl">Personas</div></div>
-      </div>
-      <div class="t-bar"><div class="t-fill" style="width:${pct}%;background:${color}"></div></div>
-    </div>`;
+function rTurno(C){
+  const names={'Turno 1':'T1 · 6am – 7pm','Turno 2':'T2 · Mixto','Turno 3':'T3 · 7pm – 6am'};
+  const maxC=Math.max(...['Turno 1','Turno 2','Turno 3'].map(t=>C.TS[t]?.cajas||0),1);
+  document.getElementById('turnoWrap').innerHTML=['Turno 1','Turno 2','Turno 3'].map(t=>{
+    const s=C.TS[t]||{cajas:0,cajC:0,cajD:0,est:0,estC:0,estD:0,vinipEst:0,pers:0};
+    const pct=Math.round(s.cajas/maxC*100),col=TC[t];
+    return `<div class="tb"><div class="tb-header"><div class="tb-name" style="color:${col}">${names[t]}</div><span class="t-badge" style="background:rgba(${hex2rgb(col)},.1);color:${col};border:1px solid rgba(${hex2rgb(col)},.2)">${s.pers} pers.</span></div><div class="tb-big" style="color:${col}">${fmtN(s.cajas)}</div><div class="tb-biglbl">cajas movilizadas</div><div class="tb-grid"><div class="tb-metric"><div class="tb-mv" style="color:var(--teal)">${fmtN(s.cajC)}</div><div class="tb-ml">Cargue cajas</div></div><div class="tb-metric"><div class="tb-mv" style="color:var(--coral)">${fmtN(s.cajD)}</div><div class="tb-ml">Descargue caj</div></div><div class="tb-metric"><div class="tb-mv" style="color:var(--sky)">${fmtN(s.est)}</div><div class="tb-ml">Estibas C/D</div></div><div class="tb-metric"><div class="tb-mv" style="color:var(--violet)">${fmtN(s.vinipEst)}</div><div class="tb-ml">Vinipelado</div></div><div class="tb-metric"><div class="tb-mv" style="color:var(--muted3)">${fmtN(s.estC)}</div><div class="tb-ml">Est. Cargue</div></div><div class="tb-metric"><div class="tb-mv" style="color:var(--gold)">${fmtN(s.estD)}</div><div class="tb-ml">Est. Descargue</div></div></div><div class="tb-bar"><div class="tb-fill" style="width:${pct}%;background:${col}"></div></div><div class="tb-pct">${pct}% del total</div></div>`;
   }).join('');
 }
 
-function renderTendencia(C) {
-  const lbls = C.allDates.map(d=>d.slice(5).replace('-','/'));
-  const ds = [
-    {label:'T1',data:C.allDates.map(d=>C.daily[d].byTurno['Turno 1']||0),borderColor:'#f5c518',backgroundColor:'rgba(245,197,24,0.06)',borderWidth:2,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#f5c518',pointBorderColor:'#06090f',pointBorderWidth:2,tension:.35,fill:false},
-    {label:'T2',data:C.allDates.map(d=>C.daily[d].byTurno['Turno 2']||0),borderColor:'#3ab4f5',backgroundColor:'rgba(58,180,245,0.06)',borderWidth:2,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#3ab4f5',pointBorderColor:'#06090f',pointBorderWidth:2,tension:.35,fill:false},
-    {label:'T3',data:C.allDates.map(d=>C.daily[d].byTurno['Turno 3']||0),borderColor:'#0de8c7',backgroundColor:'rgba(13,232,199,0.06)',borderWidth:2,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:'#0de8c7',pointBorderColor:'#06090f',pointBorderWidth:2,tension:.35,fill:false},
-    {label:'Total',data:C.allDates.map(d=>C.daily[d].total||0),borderColor:'rgba(255,255,255,0.15)',backgroundColor:'rgba(255,255,255,0.02)',borderWidth:1.5,pointRadius:2,borderDash:[4,4],tension:.35,fill:true},
-  ];
-  mkChart('chartTendencia','line',{labels:lbls,datasets:ds},{
-    responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{position:'top',labels:{boxWidth:8,padding:12,usePointStyle:true,pointStyle:'circle',color:'#5e7d99'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+fmtN(c.parsed.y)+' cajas'}}},
-    scales:{x:{grid:{color:GRID_COLOR},ticks:{maxRotation:35}},y:{grid:{color:GRID_COLOR},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}}
-  });
+function rTend(C){
+  mkChart('cTend','line',{labels:C.dates.map(shortDate),datasets:[
+    {label:'T1',data:C.dates.map(d=>C.daily[d].byT['Turno 1']||0),borderColor:'#f0b429',borderWidth:2,pointRadius:2.5,pointHoverRadius:5,pointBackgroundColor:'#f0b429',pointBorderColor:'#0d1320',pointBorderWidth:2,tension:.3,fill:false},
+    {label:'T2',data:C.dates.map(d=>C.daily[d].byT['Turno 2']||0),borderColor:'#38b2f5',borderWidth:2,pointRadius:2.5,pointHoverRadius:5,pointBackgroundColor:'#38b2f5',pointBorderColor:'#0d1320',pointBorderWidth:2,tension:.3,fill:false},
+    {label:'T3',data:C.dates.map(d=>C.daily[d].byT['Turno 3']||0),borderColor:'#10d4b4',borderWidth:2,pointRadius:2.5,pointHoverRadius:5,pointBackgroundColor:'#10d4b4',pointBorderColor:'#0d1320',pointBorderWidth:2,tension:.3,fill:false},
+    {label:'Total',data:C.dates.map(d=>C.daily[d].total||0),borderColor:'rgba(255,255,255,.12)',borderWidth:1.5,borderDash:[4,4],pointRadius:0,tension:.3,fill:false},
+  ]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:7,padding:12,usePointStyle:true,pointStyle:'circle',color:'#607a96'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+fmtN(c.parsed.y)+' cajas'}}},scales:{x:{grid:{color:GRID},ticks:{maxRotation:40,color:'#3d5575',maxTicksLimit:20}},y:{grid:{color:GRID},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v,color:'#3d5575'}}}});
 }
 
-function renderPeak(C) {
-  const hi = C.maxDay, lo = C.minDay;
-  const hiLbl = hi.fecha ? hi.fecha.slice(5).replace('-','/') : '—';
-  const loLbl = lo.fecha && lo.fecha !== '—' ? lo.fecha.slice(5).replace('-','/') : '—';
-  document.getElementById('peakBoxes').innerHTML = `
-    <div class="peak-box high"><span class="peak-ico">🔝</span>
-      <div class="peak-lbl high">DÍA PICO — MÁS ALTO</div>
-      <div class="peak-date high">${hiLbl}</div>
-      <div class="peak-val"><b style="color:var(--teal)">${fmtN(hi.val)}</b> cajas</div>
-    </div>
-    <div class="peak-box low"><span class="peak-ico">📉</span>
-      <div class="peak-lbl low">DÍA VALLE — MÁS BAJO</div>
-      <div class="peak-date low">${loLbl}</div>
-      <div class="peak-val"><b style="color:var(--coral)">${fmtN(lo.val)}</b> cajas</div>
-    </div>`;
+function rPeaks(C){
+  document.getElementById('peaks').innerHTML=`<div class="pk hi"><div class="pk-label">🔝 Día pico · Más alto</div><div class="pk-date">${shortDate(C.maxDay.fecha)}</div><div class="pk-val">${fmtN(C.maxDay.val)} cajas</div></div><div class="pk lo"><div class="pk-label">📉 Día valle · Más bajo</div><div class="pk-date">${shortDate(C.minDay.fecha)}</div><div class="pk-val">${fmtN(C.minDay.val)} cajas</div></div>`;
 }
 
-function renderDonut(C) {
-  const vals = [C.cajCargue, C.cajDesc]; const total = vals.reduce((a,v)=>a+v,0)||1;
-  mkChart('chartDonut','doughnut',{
-    labels:['Cargadas','Descargadas'],
-    datasets:[{data:vals,backgroundColor:['#0de8c7','#ff4d6a'],borderColor:'#0c1118',borderWidth:4,hoverOffset:6}]
-  },{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fmtN(c.parsed)+' cajas'}}}});
-  document.getElementById('donutLegend').innerHTML = [
-    {l:'Cargadas',v:C.cajCargue,c:'#0de8c7'},{l:'Descargadas',v:C.cajDesc,c:'#ff4d6a'}
-  ].map(i=>`<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:${i.c};flex-shrink:0"></span><span style="font-size:11px;color:var(--muted2);flex:1">${i.l}</span><span style="font-family:var(--display);font-size:16px;color:${i.c}">${fmtN(i.v)}</span><span style="font-family:var(--mono);font-size:10px;color:var(--muted);width:34px;text-align:right">${Math.round(i.v/total*100)}%</span></div>`).join('');
+function rDonut(C){
+  const vals=[C.cajC,C.cajD],total=vals.reduce((a,v)=>a+v,0)||1;
+  mkChart('cDonut','doughnut',{labels:['Cargadas','Descargadas'],datasets:[{data:vals,backgroundColor:['#10d4b4','#f5576c'],borderColor:'#0d1320',borderWidth:4,hoverOffset:5}]},{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fmtN(c.parsed)+' cajas'}}}});
+  document.getElementById('donutLeg').innerHTML=[['Cargadas',C.cajC,'#10d4b4'],['Descargadas',C.cajD,'#f5576c']].map(([l,v,c])=>`<div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:50%;background:${c};flex-shrink:0"></span><span style="font-size:11px;color:var(--muted2);flex:1">${l}</span><span style="font-family:var(--mono);font-size:14px;font-weight:700;color:${c}">${fmtN(v)}</span><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">${Math.round(v/total*100)}%</span></div>`).join('');
 }
 
-function renderEstibas(C) {
-  const vals = [C.estCargue, C.estDesc, C.totalVinipEst, C.totalMovest];
-  const total = vals.reduce((a,v)=>a+v,0)||1;
-  mkChart('chartEstibas','doughnut',{
-    labels:['C/D Cargue','C/D Descargue','Vinipelado','Movest'],
-    datasets:[{data:vals,backgroundColor:['#3ab4f5','#b08fff','#f5c518','#ff8c42'],borderColor:'#0c1118',borderWidth:4,hoverOffset:6}]
-  },{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fmtN(c.parsed)+' estibas'}}}});
-  document.getElementById('estibasLegend').innerHTML = [
-    {l:'C/D Cargue',v:C.estCargue,c:'#3ab4f5'},{l:'C/D Descargue',v:C.estDesc,c:'#b08fff'},
-    {l:'Vinipelado',v:C.totalVinipEst,c:'#f5c518'},{l:'Movest',v:C.totalMovest,c:'#ff8c42'}
-  ].map(i=>`<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:${i.c};flex-shrink:0"></span><span style="font-size:11px;color:var(--muted2);flex:1">${i.l}</span><span style="font-family:var(--display);font-size:16px;color:${i.c}">${fmtN(i.v)}</span><span style="font-family:var(--mono);font-size:10px;color:var(--muted);width:34px;text-align:right">${Math.round(i.v/total*100)}%</span></div>`).join('');
+function rEstibasMix(C){
+  const vals=[C.estC,C.estD,C.totVinipEst,C.totMovest],total=vals.reduce((a,v)=>a+v,0)||1;
+  mkChart('cEstibas','doughnut',{labels:['Est. Cargue','Est. Descargue','Vinipelado','Movest'],datasets:[{data:vals,backgroundColor:['#38b2f5','#a78bfa','#f0b429','#fb923c'],borderColor:'#0d1320',borderWidth:4,hoverOffset:5}]},{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fmtN(c.parsed)+' estibas'}}}});
+  document.getElementById('estibasLeg').innerHTML=[['Est. Cargue',C.estC,'#38b2f5'],['Est. Descargue',C.estD,'#a78bfa'],['Vinipelado',C.totVinipEst,'#f0b429'],['Movest',C.totMovest,'#fb923c']].map(([l,v,c])=>`<div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:50%;background:${c};flex-shrink:0"></span><span style="font-size:10px;color:var(--muted2);flex:1">${l}</span><span style="font-family:var(--mono);font-size:14px;font-weight:700;color:${c}">${fmtN(v)}</span><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">${Math.round(v/total*100)}%</span></div>`).join('');
 }
 
-function renderPersonasDia(C) {
-  const lbls = C.allDates.map(d=>d.slice(5).replace('-','/'));
-  mkChart('chartPersonasDia','bar',{
-    labels:lbls,
-    datasets:[
-      {label:'T1',data:C.allDates.map(d=>C.daily[d].personasByTurno['Turno 1'].size||0),backgroundColor:'rgba(245,197,24,0.75)',borderRadius:3,stack:'p'},
-      {label:'T2',data:C.allDates.map(d=>C.daily[d].personasByTurno['Turno 2'].size||0),backgroundColor:'rgba(58,180,245,0.75)',borderRadius:3,stack:'p'},
-      {label:'T3',data:C.allDates.map(d=>C.daily[d].personasByTurno['Turno 3'].size||0),backgroundColor:'rgba(13,232,199,0.75)',borderRadius:3,stack:'p'},
-    ]
-  },{
-    responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{position:'top',labels:{boxWidth:8,padding:12,usePointStyle:true,pointStyle:'circle',color:'#5e7d99'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+c.parsed.y+' personas'}}},
-    scales:{x:{grid:{display:false},ticks:{maxRotation:35}},y:{grid:{color:GRID_COLOR},stacked:true,ticks:{stepSize:1,callback:v=>Math.round(v)==v?v:''}}}
-  });
-  document.getElementById('personasDaySummary').innerHTML = `
-    <div class="pday-box"><div class="pday-val" style="color:var(--teal)">${C.totalPersonas}</div><div class="pday-lbl">Total únicos</div></div>
-    <div class="pday-box"><div class="pday-val" style="color:var(--gold)">${C.t1Personas}</div><div class="pday-lbl">T1 · 6am–7pm</div></div>
-    <div class="pday-box"><div class="pday-val" style="color:var(--sky)">${C.t2Personas}</div><div class="pday-lbl">T2 · Mixto</div></div>
-    <div class="pday-box"><div class="pday-val" style="color:var(--teal)">${C.t3Personas}</div><div class="pday-lbl">T3 · 7pm–6am</div></div>`;
+function rPersDia(C){
+  mkChart('cPersDia','bar',{labels:C.dates.map(shortDate),datasets:[
+    {label:'T1',data:C.dates.map(d=>C.daily[d].persT['Turno 1'].size||0),backgroundColor:'rgba(240,180,41,.75)',borderRadius:3,stack:'p'},
+    {label:'T2',data:C.dates.map(d=>C.daily[d].persT['Turno 2'].size||0),backgroundColor:'rgba(56,178,245,.75)',borderRadius:3,stack:'p'},
+    {label:'T3',data:C.dates.map(d=>C.daily[d].persT['Turno 3'].size||0),backgroundColor:'rgba(16,212,180,.75)',borderRadius:3,stack:'p'},
+  ]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:7,padding:12,usePointStyle:true,pointStyle:'circle',color:'#607a96'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+c.parsed.y+' pers.'}}},scales:{x:{grid:{display:false},ticks:{maxRotation:40,color:'#3d5575',maxTicksLimit:20}},y:{grid:{color:GRID},stacked:true,ticks:{stepSize:1,callback:v=>Math.round(v)===v?v:'',color:'#3d5575'}}}});
+  document.getElementById('persSummary').innerHTML=`<div class="pb"><div class="pb-val" style="color:var(--teal)">${C.totalPersonas}</div><div class="pb-lbl">Únicos total</div></div><div class="pb"><div class="pb-val" style="color:var(--gold)">${C.t1P}</div><div class="pb-lbl">T1 · 6am–7pm</div></div><div class="pb"><div class="pb-val" style="color:var(--sky)">${C.t2P}</div><div class="pb-lbl">T2 · Mixto</div></div><div class="pb"><div class="pb-val" style="color:var(--teal)">${C.t3P}</div><div class="pb-lbl">T3 · 7pm–6am</div></div>`;
 }
 
-function renderOps(C) {
-  const top = C.personas.slice(0,10); const maxC = top[0]?.cajas||1;
-  mkChart('chartOps','bar',{
-    labels:top.map(p=>p.name.split(' ')[0]),
-    datasets:[{label:'Cajas',data:top.map(p=>p.cajas),backgroundColor:top.map((_,i)=>i===0?'#f5c518':i<3?'#0de8c7':'rgba(13,232,199,0.3)'),borderRadius:4,borderSkipped:false}]
-  },{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fmtN(c.parsed.y)+' cajas'}}},scales:{x:{grid:{display:false}},y:{grid:{color:GRID_COLOR},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}}}});
-  const rnk = ['rk1','rk2','rk3'];
-  document.getElementById('tbOps').innerHTML = top.map((p,i) => {
-    const pct = Math.round(p.cajas/maxC*100);
-    const color = TURNO_COLOR[p.mainTurno]||'#5e7d99';
-    return `<tr>
-      <td><span class="rank ${rnk[i]||''}">${i+1}</span></td>
-      <td style="font-weight:600">${p.name}</td>
-      <td><span class="he-badge-turno" style="background:rgba(${hexToRgb(color)},.1);color:${color};border:1px solid rgba(${hexToRgb(color)},.25)">${p.mainTurno.replace('Turno ','T')}</span></td>
-      <td><b style="color:var(--teal);font-family:var(--display);font-size:16px">${fmtN(p.cajas)}</b></td>
-      <td style="color:var(--sky)">${fmtN(p.estibas)}</td>
-      <td style="color:var(--muted2)">${p.diasActivos}</td>
-      <td><div style="display:flex;align-items:center;gap:6px"><div class="mini-bg"><div class="mini-fill" style="width:${pct}%;background:var(--teal)"></div></div><span style="font-size:9px;color:var(--muted);width:28px">${pct}%</span></div></td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="7" class="nd">Sin datos de operarios</td></tr>';
+function rOps(C){
+  const top=C.personas.slice(0,10),maxC=top[0]?.cajas||1;
+  mkChart('cOps','bar',{labels:top.map(p=>p.name.split(' ')[0]),datasets:[{label:'Cajas',data:top.map(p=>p.cajas),backgroundColor:top.map((_,i)=>i===0?'#f0b429':i<3?'rgba(16,212,180,.8)':'rgba(16,212,180,.3)'),borderRadius:4,borderSkipped:false}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fmtN(c.parsed.y)+' cajas'}}},scales:{x:{grid:{display:false},ticks:{color:'#3d5575'}},y:{grid:{color:GRID},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v,color:'#3d5575'}}}});
+  const rnk=['rk1','rk2','rk3'];
+  document.getElementById('tbOps').innerHTML=top.map((p,i)=>{
+    const pct=Math.round(p.cajas/maxC*100),col=TC[p.mainT]||'#607a96';
+    return `<tr><td><span class="rk ${rnk[i]||''}">${i+1}</span></td><td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis">${p.name}</td><td><span class="t-badge" style="background:rgba(${hex2rgb(col)},.1);color:${col};border:1px solid rgba(${hex2rgb(col)},.2)">${p.mainT.replace('Turno ','T')}</span></td><td><b style="color:var(--teal);font-family:var(--mono);font-weight:700">${fmtN(p.cajas)}</b></td><td style="color:var(--sky)">${fmtN(p.estibas)}</td><td style="color:var(--muted2)">${p.dias}</td><td><div style="display:flex;align-items:center;gap:5px"><div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:var(--teal)"></div></div><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:26px">${pct}%</span></div></td></tr>`;
+  }).join('')||'<tr><td colspan="7" class="empty">Sin datos</td></tr>';
 }
 
-function renderMVP(C) {
-  if (!C.personas.length) { document.getElementById('mvpCard').innerHTML='<div class="nd">Sin datos</div>'; return; }
-  const p = C.personas[0];
-  const color = TURNO_COLOR[p.mainTurno]||'#5e7d99';
-  const avatarC = avatarColor(p.name);
-  const initials = p.name.split(' ').slice(0,2).map(w=>w[0]||'').join('');
-  document.getElementById('mvpCard').innerHTML = `
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
-      <div style="width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:24px;background:rgba(${hexToRgb(avatarC)},.15);border:2px solid ${avatarC}40;color:${avatarC};flex-shrink:0">${initials}</div>
-      <div>
-        <div style="font-family:var(--display);font-size:22px;color:#fff;letter-spacing:1px">${p.name}</div>
-        <div style="font-family:var(--mono);font-size:10px;margin-top:3px;color:${color}">${p.mainTurno} · ${p.diasActivos} día${p.diasActivos!==1?'s':''} activos</div>
-        <div style="margin-top:8px;display:inline-flex;align-items:center;gap:6px;background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.25);border-radius:100px;padding:4px 12px;font-family:var(--mono);font-size:10px;color:var(--gold)">🏆 MVP del período</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px">
-        <div style="font-family:var(--display);font-size:32px;color:var(--teal);line-height:1">${fmtN(p.cajas)}</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:3px">Cajas movilizadas</div>
-      </div>
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px">
-        <div style="font-family:var(--display);font-size:32px;color:var(--sky);line-height:1">${fmtN(p.estibas)}</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:3px">Estibas movidas</div>
-      </div>
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px">
-        <div style="font-family:var(--display);font-size:28px;color:var(--muted3);line-height:1">${p.ops}</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:3px">Registros de turno</div>
-      </div>
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:12px">
-        <div style="font-family:var(--display);font-size:28px;color:var(--gold);line-height:1">${p.diasActivos}</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:3px">Días con actividad</div>
-      </div>
-    </div>`;
+function rMVP(C){
+  if(!C.personas.length){document.getElementById('mvpCard').innerHTML='<div class="empty">Sin datos</div>';return;}
+  const p=C.personas[0],col=TC[p.mainT]||'#607a96',ac=avatarClr(p.name);
+  const init=p.name.split(' ').slice(0,2).map(w=>w[0]||'').join('');
+  document.getElementById('mvpCard').innerHTML=`<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><div class="mvp-avatar" style="background:rgba(${hex2rgb(ac)},.15);border:2px solid ${ac}50;color:${ac}">${init}</div><div><div class="mvp-name">${p.name}</div><div class="mvp-sub" style="color:${col}">${p.mainT} · ${p.dias} día${p.dias!==1?'s':''}</div><div class="mvp-trophy">🏆 MVP del período</div></div></div><div class="mvp-stats"><div class="mvp-stat"><div class="mvp-sv" style="color:var(--teal)">${fmtN(p.cajas)}</div><div class="mvp-sl">Cajas movilizadas</div></div><div class="mvp-stat"><div class="mvp-sv" style="color:var(--sky)">${fmtN(p.estibas)}</div><div class="mvp-sl">Estibas movidas</div></div><div class="mvp-stat"><div class="mvp-sv" style="color:var(--muted3)">${p.ops}</div><div class="mvp-sl">Registros de turno</div></div><div class="mvp-stat"><div class="mvp-sv" style="color:var(--gold)">${p.dias}</div><div class="mvp-sl">Días activos</div></div></div>`;
 }
 
-function renderVehs(C) {
-  const top = C.vehs.slice(0,10); const maxV = top[0]?.cajas||1;
-  const rnk = ['rk1','rk2','rk3'];
-  document.getElementById('tbVehs').innerHTML = top.map((v,i) => {
-    const pct = Math.round(v.cajas/maxV*100);
-    const tcolor = v.turnos.length===1 ? (TURNO_COLOR[v.turnos[0]]||'#5e7d99') : '#b08fff';
-    const hrsStr = v.hrsEst < 1 ? `${Math.round(v.hrsEst*60)}min` : `~${v.hrsEst}h`;
-    return `<tr>
-      <td><span class="rank ${rnk[i]||''}">${i+1}</span></td>
-      <td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.8px">${v.placa}</td>
-      <td><b style="font-family:var(--display);font-size:16px;color:var(--teal)">${fmtN(v.cajas)}</b></td>
-      <td style="color:var(--sky)">${fmtN(v.est)}</td>
-      <td style="color:var(--muted2)">${v.ops}</td>
-      <td><span class="he-badge-turno" style="background:rgba(${hexToRgb(tcolor)},.1);color:${tcolor};border:1px solid rgba(${hexToRgb(tcolor)},.2)">${v.turnos.map(t=>t.replace('Turno ','')).join('/')}</span></td>
-      <td><b style="color:var(--orange);font-family:var(--mono);font-size:11px">${hrsStr}</b></td>
-      <td><div style="display:flex;align-items:center;gap:5px"><div class="mini-bg"><div class="mini-fill" style="width:${pct}%;background:var(--gold)"></div></div></div></td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="8" class="nd">Sin datos de vehículos</td></tr>';
+function rVehs(C){
+  const top=C.vehs.slice(0,10),maxV=top[0]?.cajas||1;
+  const rnk=['rk1','rk2','rk3'];
+  document.getElementById('tbVehs').innerHTML=top.map((v,i)=>{
+    const pct=Math.round(v.cajas/maxV*100),col=v.turnos.length===1?(TC[v.turnos[0]]||'#607a96'):'#a78bfa';
+    const hrs=v.hrsEst<1?`${Math.round(v.hrsEst*60)}min`:`~${v.hrsEst}h`;
+    return `<tr><td><span class="rk ${rnk[i]||''}">${i+1}</span></td><td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.8px">${v.placa}</td><td><b style="font-family:var(--mono);font-weight:700;color:var(--teal)">${fmtN(v.cajas)}</b></td><td style="color:var(--sky)">${fmtN(v.est)}</td><td style="color:var(--muted2)">${v.ops}</td><td><span class="t-badge" style="background:rgba(${hex2rgb(col)},.1);color:${col};border:1px solid rgba(${hex2rgb(col)},.2)">${v.turnos.map(t=>t.replace('Turno ','')).join('/')}</span></td><td style="font-family:var(--mono);font-size:10px;color:var(--orange)">${hrs}</td><td><div style="display:flex;align-items:center;gap:4px"><div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:var(--gold)"></div></div></div></td></tr>`;
+  }).join('')||'<tr><td colspan="8" class="empty">Sin datos</td></tr>';
 }
 
-function renderVehChart(C) {
-  const top = C.vehs.slice(0,10);
-  mkChart('chartVehs','bar',{
-    labels:top.map(v=>v.placa),
-    datasets:[
-      {label:'Cajas',data:top.map(v=>v.cajas),backgroundColor:'rgba(245,197,24,0.8)',borderRadius:3,stack:'v'},
-      {label:'Estibas',data:top.map(v=>v.est),backgroundColor:'rgba(58,180,245,0.5)',borderRadius:3,stack:'v'}
-    ]
-  },{
-    responsive:true,maintainAspectRatio:false,indexAxis:'y',
-    plugins:{legend:{position:'top',labels:{boxWidth:8,padding:12,usePointStyle:true,pointStyle:'circle',color:'#5e7d99'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+fmtN(c.parsed.x)}}},
-    scales:{x:{grid:{color:GRID_COLOR},stacked:true,ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}},y:{grid:{display:false},stacked:true,ticks:{font:{size:9},color:'#8aa3bc'}}}
-  });
+function rVehChart(C){
+  const top=C.vehs.slice(0,10);
+  mkChart('cVehs','bar',{labels:top.map(v=>v.placa),datasets:[{label:'Cajas',data:top.map(v=>v.cajas),backgroundColor:'rgba(240,180,41,.8)',borderRadius:3,stack:'v'},{label:'Estibas',data:top.map(v=>v.est),backgroundColor:'rgba(56,178,245,.45)',borderRadius:3,stack:'v'}]},{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{position:'top',labels:{boxWidth:7,padding:10,usePointStyle:true,pointStyle:'circle',color:'#607a96'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+fmtN(c.parsed.x)}}},scales:{x:{grid:{color:GRID},stacked:true,ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v,color:'#3d5575'}},y:{grid:{display:false},stacked:true,ticks:{font:{size:9},color:'#8aa3bc'}}}});
 }
 
-function renderVinip(C) {
-  const lbls = C.vinipDates.map(d=>d.slice(5).replace('-','/'));
-  mkChart('chartVinip','bar',{
-    labels:lbls,
-    datasets:[
-      {label:'T1 Estibas Vinip',data:C.vinipDates.map(d=>C.vinipDaily[d]?.['Turno 1']||0),backgroundColor:'rgba(245,197,24,0.75)',borderRadius:3,stack:'v'},
-      {label:'T2 Estibas Vinip',data:C.vinipDates.map(d=>C.vinipDaily[d]?.['Turno 2']||0),backgroundColor:'rgba(58,180,245,0.75)',borderRadius:3,stack:'v'},
-      {label:'T3 Estibas Vinip',data:C.vinipDates.map(d=>C.vinipDaily[d]?.['Turno 3']||0),backgroundColor:'rgba(13,232,199,0.75)',borderRadius:3,stack:'v'},
-    ]
-  },{
-    responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{position:'top',labels:{boxWidth:8,padding:10,usePointStyle:true,pointStyle:'circle',color:'#5e7d99'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+fmtN(c.parsed.y)+' estibas'}}},
-    scales:{x:{grid:{display:false},ticks:{maxRotation:35}},y:{grid:{color:GRID_COLOR},stacked:true}}
-  });
+function rVinip(C){
+  mkChart('cVinip','bar',{labels:C.vdates.map(shortDate),datasets:[{label:'T1',data:C.vdates.map(d=>C.vdaily[d]?.['Turno 1']||0),backgroundColor:'rgba(240,180,41,.75)',borderRadius:3,stack:'v'},{label:'T2',data:C.vdates.map(d=>C.vdaily[d]?.['Turno 2']||0),backgroundColor:'rgba(56,178,245,.75)',borderRadius:3,stack:'v'},{label:'T3',data:C.vdates.map(d=>C.vdaily[d]?.['Turno 3']||0),backgroundColor:'rgba(16,212,180,.75)',borderRadius:3,stack:'v'}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:7,padding:10,usePointStyle:true,pointStyle:'circle',color:'#607a96'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+fmtN(c.parsed.y)+' est.'}}},scales:{x:{grid:{display:false},ticks:{maxRotation:40,color:'#3d5575'}},y:{grid:{color:GRID},stacked:true,ticks:{color:'#3d5575'}}}});
 }
 
-function renderMovest(C) {
-  const rows = C.movest.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha)).slice(0,20);
-  document.getElementById('tbMovest').innerHTML = rows.map(r => {
-    const color = TURNO_COLOR[r.turno]||'#5e7d99';
-    return `<tr>
-      <td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${r.fecha.slice(5).replace('-','/')}</td>
-      <td><span class="he-badge-turno" style="background:rgba(${hexToRgb(color)},.1);color:${color};border:1px solid rgba(${hexToRgb(color)},.2)">${r.turno.replace('Turno ','T')}</span></td>
-      <td style="font-size:11px">${r.coordinador||'—'}</td>
-      <td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${r.origen||'—'}</td>
-      <td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${r.destino||'—'}</td>
-      <td><b style="font-family:var(--display);font-size:16px;color:var(--violet)">${fmtN(r.cantidad)}</b></td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="6" class="nd">Sin datos de movest</td></tr>';
+function rMovest(C){
+  const rows=[...C.movest].sort((a,b)=>b.fecha.localeCompare(a.fecha)).slice(0,20);
+  document.getElementById('tbMovest').innerHTML=rows.map(r=>{
+    const col=TC[r.turno]||'#607a96';
+    return `<tr><td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${shortDate(r.fecha)}</td><td><span class="t-badge" style="background:rgba(${hex2rgb(col)},.1);color:${col};border:1px solid rgba(${hex2rgb(col)},.2)">${r.turno.replace('Turno ','T')}</span></td><td style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis">${r.coord||'—'}</td><td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${r.origen||'—'}</td><td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${r.destino||'—'}</td><td><b style="font-family:var(--mono);font-weight:700;color:var(--violet)">${fmtN(r.cantidad)}</b></td></tr>`;
+  }).join('')||'<tr><td colspan="6" class="empty">Sin datos</td></tr>';
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────
-loadData();
+(async function init() {
+  try {
+    RAW = await loadEmbeddedData();
+    setDefaultDates();
+    applyFilter();
+    const tot=RAW.cajas.length+RAW.estibas.length+RAW.vinip.length+RAW.movest.length;
+    document.getElementById('hSub').textContent=`${tot.toLocaleString('es-CO')} registros · Cajas·${RAW.cajas.length} · Estibas·${RAW.estibas.length} · Vinip·${RAW.vinip.length} · Movest·${RAW.movest.length} · Mayo–Jun 2026`;
+  } catch(e) { console.error(e); }
+  const l=document.getElementById('loader');
+  l.classList.add('hide');
+  setTimeout(()=>l.style.display='none',600);
+  document.getElementById('progFill').style.width='0';
+})();
 </script>
 </body>
 </html>
