@@ -262,18 +262,7 @@ footer{margin-top:60px;text-align:center;color:var(--muted2);font-size:10px;}
 <section class="section">
     <div class="section-header">
         <div>
-            <div class="eyebrow">06 · Turnos</div>
-            <h2 class="section-title">¿En qué turno se mueve la operación?</h2>
-            <p class="section-description">% de operaciones registradas en cada turno, para el mes seleccionado.</p>
-        </div>
-    </div>
-    <div id="turnosCoordWrap"></div>
-</section>
-
-<section class="section">
-    <div class="section-header">
-        <div>
-            <div class="eyebrow">07 · Destinos</div>
+            <div class="eyebrow">06 · Destinos</div>
             <h2 class="section-title">Destinos con más operaciones, tiempo de cargue y de descargue</h2>
         </div>
     </div>
@@ -291,7 +280,7 @@ footer{margin-top:60px;text-align:center;color:var(--muted2);font-size:10px;}
 <section class="section">
     <div class="section-header">
         <div>
-            <div class="eyebrow">08 · Baches detectados</div>
+            <div class="eyebrow">07 · Baches detectados</div>
             <h2 class="section-title">Días con actividad casi nula o nula</h2>
             <p class="section-description">La mayoría son domingos (patrón normal). El que no lo es, queda marcado como una alerta real.</p>
         </div>
@@ -302,7 +291,7 @@ footer{margin-top:60px;text-align:center;color:var(--muted2);font-size:10px;}
 <section class="section">
     <div class="section-header">
         <div>
-            <div class="eyebrow">09 · Lectura ejecutiva</div>
+            <div class="eyebrow">08 · Lectura ejecutiva</div>
             <h2 class="section-title">Qué cambió frente al informe anterior</h2>
         </div>
     </div>
@@ -314,7 +303,6 @@ footer{margin-top:60px;text-align:center;color:var(--muted2);font-size:10px;}
             <li><b>Cajas movidas y estibas confirmadas contra el archivo fuente:</b> julio mueve <b>13.540 cajas/día</b> en promedio (13.539,8) y <b>450 estibas/día</b> (450,5) — recalculado directamente desde el Excel original, coincide con el reporte anterior.</li>
             <li><b>Nuevos filtros:</b> además de mes y semana, ahora puedes filtrar por <b>corte</b> (1–15 / 16–fin de mes) y por <b>día específico</b> — los indicadores de la sección 02 se recalculan al vuelo con cada filtro.</li>
             <li><b>Los baches reales son pocos:</b> en junio, los días 7, 21 y 28 (todos domingos) tuvieron actividad casi nula. En julio, el día 30 no tiene ningún registro — vale la pena confirmar con el equipo si simplemente no se registró o no hubo operación ese día.</li>
-            <li><b>El Turno 3 (noche) sigue siendo el más cargado</b> en ambos meses (56% en junio, 61% en julio).</li>
         </ul>
     </div>
 </section>
@@ -409,7 +397,6 @@ function render(){
     renderFilters();
     renderKPIs();
     renderCharts();
-    renderTurnosCoordinadores();
     renderDestinos();
     renderBaches();
     renderResumenMes();
@@ -733,24 +720,6 @@ function renderCompareCharts(){
         </ul>`;
 }
 
-function renderTurnosCoordinadores(){
-    const wrap = document.getElementById('turnosCoordWrap');
-    wrap.innerHTML = `<div class="card"><h3 class="card-title">Participación por turno</h3><p class="card-sub">% de operaciones registradas en cada turno</p><div class="chart small"><canvas id="chartTurnos"></canvas></div></div>`;
-
-    const ctxT = document.getElementById('chartTurnos');
-    if(state.mes==='comparar'){
-        charts.turnos = new Chart(ctxT, { type:'bar', data:{ labels:['Turno 1','Turno 2','Turno 3'], datasets:[
-            { label:'Junio', data:[DATA.junio.turnos['1'],DATA.junio.turnos['2'],DATA.junio.turnos['3']], backgroundColor:COLORS.orange, borderRadius:6 },
-            { label:'Julio', data:[DATA.julio.turnos['1'],DATA.julio.turnos['2'],DATA.julio.turnos['3']], backgroundColor:COLORS.blue, borderRadius:6 },
-        ]}, options:{...baseOpts, scales:{...baseScales, y:{...baseScales.y, ticks:{...baseScales.y.ticks, callback:v=>v+'%'}}}}});
-    } else {
-        const t = DATA[state.mes].turnos;
-        charts.turnos = new Chart(ctxT, { type:'bar', data:{ labels:['Turno 1','Turno 2','Turno 3'], datasets:[
-            { label: MES_LABEL[state.mes], data:[t['1'],t['2'],t['3']], backgroundColor:[COLORS.navy,COLORS.blue,COLORS.orange], borderRadius:6 },
-        ]}, options:{...baseOpts, plugins:{legend:{display:false}}, scales:{...baseScales, y:{...baseScales.y, ticks:{...baseScales.y.ticks, callback:v=>v+'%'}}}}});
-    }
-}
-
 function renderResumenMes(){
     const el = document.getElementById('resumenMes');
     if(state.mes==='comparar'){
@@ -850,7 +819,6 @@ function renderBaches(){
 }
 
 render();
-
 </script>
 </body>
 </html>
