@@ -1,545 +1,819 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard · INNOVAPEP / INLOTRANS</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>INNOVA · INLOTRANS · Indicadores Semanales Junio–Julio 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg: #080c12; --s1: #0d1320; --s2: #111a28; --s3: #172030; --s4: #1e2d42;
-  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.10); --border3: rgba(255,255,255,0.16);
-  --gold: #f0b429; --teal: #10d4b4; --coral: #f5576c; --sky: #38b2f5; --violet: #a78bfa;
-  --green: #22c55e; --orange: #fb923c; --text: #cad5e2; --muted: #3d5575; --muted2: #607a96; --muted3: #8aa3bc;
-  --r: 10px; --mono: 'JetBrains Mono', monospace; --sans: 'Inter', sans-serif;
+:root{
+    --navy:#344083; --blue:#438FB6; --orange:#DF8558; --green:#4C8A32; --green-dark:#3c6f28;
+    --bg:#f7f8fb; --panel:#ffffff; --panel2:#f1f3f8; --panel3:#eaedf5;
+    --line:rgba(20,25,45,.09);
+    --text:#1c2233; --muted:#5b6478; --muted2:#828da0;
+    --red:#c8434c;
+    --radius:18px;
+    --shadow: 0 1px 2px rgba(20,25,45,.04), 0 6px 20px rgba(20,25,45,.05);
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; overflow-x: hidden; min-height: 100vh; }
-#loader { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; transition: opacity .5s; }
-#loader.hide { opacity: 0; pointer-events: none; }
-.ld-logo { font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: 3px; color: var(--muted3); text-transform: uppercase; }
-.ld-logo span { color: var(--gold); }
-.ld-bar { width: 240px; height: 2px; background: var(--s3); border-radius: 2px; overflow: hidden; }
-.ld-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--teal)); animation: ldAnim 1.6s ease-in-out infinite; }
-@keyframes ldAnim { 0%{width:0;margin-left:0}50%{width:55%;margin-left:20%}100%{width:0;margin-left:100%} }
-.ld-txt { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .5px; }
-.header { position: sticky; top: 0; z-index: 200; background: rgba(8,12,18,0.96); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border2); padding: 0 24px; height: 58px; display: flex; align-items: center; gap: 14px; }
-.h-logo { width: 32px; height: 32px; border-radius: 7px; background: linear-gradient(135deg, var(--gold), #c08010); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 700; color: #000; flex-shrink: 0; }
-.h-text { flex: 1; }
-.h-title { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: .3px; line-height: 1.2; }
-.h-title em { color: var(--gold); font-style: normal; }
-.h-sub { font-family: var(--mono); font-size: 10px; color: var(--muted2); margin-top: 1px; letter-spacing: .3px; }
-.h-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.live-pill { display: flex; align-items: center; gap: 6px; background: rgba(34,197,94,.07); border: 1px solid rgba(34,197,94,.2); border-radius: 100px; padding: 5px 12px; font-family: var(--mono); font-size: 10px; color: var(--green); letter-spacing: .3px; }
-.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.8s infinite; }
-@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.25} }
-.filter-bar { background: var(--s1); border-bottom: 1px solid var(--border); padding: 10px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.filter-label { font-family: var(--mono); font-size: 10px; color: var(--muted3); text-transform: uppercase; letter-spacing: .8px; white-space: nowrap; }
-.date-inputs { display: flex; align-items: center; gap: 8px; }
-.date-input { background: var(--s2); border: 1px solid var(--border2); border-radius: 7px; padding: 5px 10px; font-family: var(--mono); font-size: 11px; color: var(--text); cursor: pointer; outline: none; transition: border-color .15s; }
-.date-input:focus { border-color: var(--gold); }
-.date-sep { font-family: var(--mono); font-size: 10px; color: var(--muted); }
-.quick-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-.qbtn { padding: 5px 11px; border-radius: 6px; border: 1px solid var(--border2); background: var(--s2); font-family: var(--mono); font-size: 10px; color: var(--muted3); cursor: pointer; letter-spacing: .3px; transition: all .15s; white-space: nowrap; }
-.qbtn:hover, .qbtn.active { background: rgba(240,180,41,.1); border-color: rgba(240,180,41,.35); color: var(--gold); }
-.filter-result { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--muted2); white-space: nowrap; }
-.filter-result span { color: var(--teal); font-weight: 600; }
-.main { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
-.sh { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
-.sh-title { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.8px; color: var(--muted3); padding-left: 10px; border-left: 2px solid var(--gold); }
-.sh-note { font-family: var(--mono); font-size: 10px; color: var(--muted); background: var(--s1); border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; }
-.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.kpi-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-.kpi { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 14px 12px; position: relative; overflow: hidden; transition: transform .2s, border-color .2s, box-shadow .2s; }
-.kpi:hover { transform: translateY(-2px); border-color: var(--border3); box-shadow: 0 12px 32px rgba(0,0,0,.4); }
-.kpi::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--ac, var(--gold)); }
-.kpi-icon { font-size: 16px; margin-bottom: 7px; display: block; opacity: .75; }
-.kpi-label { font-size: 11px; font-weight: 500; color: var(--muted3); margin-bottom: 3px; line-height: 1.3; }
-.kpi-value { font-family: var(--mono); font-size: 28px; font-weight: 700; color: var(--ac, var(--gold)); line-height: 1; letter-spacing: -1px; }
-.kpi-sub { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 7px; border-top: 1px solid var(--border); padding-top: 6px; line-height: 1.5; }
-.kpi-sub b { color: var(--muted3); }
-.card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
-.card-hd { display: flex; align-items: flex-start; justify-content: space-between; padding: 13px 16px 11px; border-bottom: 1px solid var(--border); }
-.card-title { font-size: 12px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 6px; line-height: 1.3; }
-.card-desc { font-family: var(--mono); font-size: 10px; color: var(--muted2); margin-top: 2px; }
-.tag { font-family: var(--mono); font-size: 8px; font-weight: 600; text-transform: uppercase; padding: 3px 8px; border-radius: 100px; letter-spacing: .5px; white-space: nowrap; }
-.tag-y { background: rgba(240,180,41,.1); color: var(--gold); border: 1px solid rgba(240,180,41,.2); }
-.tag-g { background: rgba(16,212,180,.1); color: var(--teal); border: 1px solid rgba(16,212,180,.2); }
-.tag-b { background: rgba(56,178,245,.1); color: var(--sky); border: 1px solid rgba(56,178,245,.2); }
-.tag-v { background: rgba(167,139,250,.1); color: var(--violet); border: 1px solid rgba(167,139,250,.2); }
-.tag-r { background: rgba(245,87,108,.1); color: var(--coral); border: 1px solid rgba(245,87,108,.2); }
-.cw { padding: 12px 14px; position: relative; }
-.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-.g13 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
-.g21 { display: grid; grid-template-columns: 3fr 2fr; gap: 12px; }
-.turno-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
-.tb { padding: 16px 18px; border-right: 1px solid var(--border); }
-.tb:last-child { border-right: none; }
-.tb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.tb-name { font-family: var(--mono); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.4px; }
-.tb-big { font-family: var(--mono); font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -1.5px; }
-.tb-biglbl { font-size: 11px; color: var(--muted3); font-weight: 500; margin-bottom: 11px; }
-.tb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
-.tb-metric { background: var(--s2); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; }
-.tb-mv { font-family: var(--mono); font-size: 18px; font-weight: 700; line-height: 1; }
-.tb-ml { font-family: var(--mono); font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 1px; }
-.tb-bar { height: 2px; background: var(--s3); border-radius: 1px; overflow: hidden; margin-top: 8px; }
-.tb-fill { height: 100%; border-radius: 1px; transition: width .8s cubic-bezier(.4,0,.2,1); }
-.tb-pct { font-family: var(--mono); font-size: 9px; color: var(--muted); text-align: right; margin-top: 3px; }
-.peaks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--border); }
-.pk { border-radius: 8px; padding: 13px 14px; }
-.pk.hi { background: rgba(16,212,180,.04); border: 1px solid rgba(16,212,180,.18); }
-.pk.lo { background: rgba(245,87,108,.04); border: 1px solid rgba(245,87,108,.15); }
-.pk-label { font-family: var(--mono); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 4px; }
-.pk.hi .pk-label { color: var(--teal); }
-.pk.lo .pk-label { color: var(--coral); }
-.pk-date { font-family: var(--mono); font-size: 20px; font-weight: 700; line-height: 1; }
-.pk.hi .pk-date { color: var(--teal); }
-.pk.lo .pk-date { color: var(--coral); }
-.pk-val { font-family: var(--mono); font-size: 11px; margin-top: 3px; color: var(--muted3); }
-.tw { overflow-x: auto; max-height: 360px; overflow-y: auto; }
-.tw::-webkit-scrollbar { width: 3px; height: 3px; }
-.tw::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 2px; }
-table { width: 100%; border-collapse: collapse; }
-thead { position: sticky; top: 0; z-index: 2; background: var(--s2); }
-thead tr { border-bottom: 1px solid var(--border3); }
-th { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted2); font-weight: 500; padding: 8px 12px; text-align: left; white-space: nowrap; }
-td { padding: 9px 12px; font-size: 12px; color: var(--text); white-space: nowrap; }
-tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
-tbody tr:hover { background: var(--s2); }
-tbody tr:last-child { border: none; }
-.rk { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 8px; font-weight: 700; background: var(--s3); color: var(--muted); }
-.rk1 { background: rgba(240,180,41,.15); color: var(--gold); }
-.rk2 { background: rgba(203,213,225,.07); color: #9fb0c0; }
-.rk3 { background: rgba(200,140,80,.1); color: #d4905a; }
-.mini-bar { height: 4px; background: var(--s3); border-radius: 2px; overflow: hidden; flex: 1; min-width: 44px; }
-.mini-fill { height: 100%; border-radius: 2px; transition: width .5s; }
-.t-badge { font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 100px; letter-spacing: .3px; }
-.empty { padding: 28px; text-align: center; color: var(--muted); font-family: var(--mono); font-size: 11px; }
-.psummary { display: flex; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
-.pb { background: var(--s2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.pb-val { font-family: var(--mono); font-size: 22px; font-weight: 700; line-height: 1; }
-.pb-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
-#mvpCard { padding: 18px; }
-.mvp-avatar { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 20px; font-weight: 700; flex-shrink: 0; }
-.mvp-name { font-size: 16px; font-weight: 700; color: #fff; line-height: 1.2; }
-.mvp-sub { font-family: var(--mono); font-size: 10px; margin-top: 3px; }
-.mvp-trophy { display: inline-flex; align-items: center; gap: 5px; background: rgba(240,180,41,.1); border: 1px solid rgba(240,180,41,.25); border-radius: 100px; padding: 3px 10px; font-family: var(--mono); font-size: 9px; color: var(--gold); margin-top: 7px; }
-.mvp-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 15px; }
-.mvp-stat { background: var(--s2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; }
-.mvp-sv { font-family: var(--mono); font-size: 24px; font-weight: 700; line-height: 1; }
-.mvp-sl { font-family: var(--mono); font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-top: 2px; }
-.prog-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 2px; z-index: 500; }
-.prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--teal)); }
-footer { text-align: center; padding: 14px; font-family: var(--mono); font-size: 9px; color: var(--muted); border-top: 1px solid var(--border); letter-spacing: .5px; line-height: 1.8; }
-footer em { color: var(--gold); font-style: normal; }
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 2px; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+    font-family:'Inter',sans-serif;
+    background:
+        radial-gradient(circle at 5% -10%, rgba(52,64,131,.07), transparent 32%),
+        radial-gradient(circle at 95% 5%, rgba(67,143,182,.06), transparent 32%),
+        radial-gradient(circle at 50% 100%, rgba(76,138,50,.04), transparent 40%),
+        var(--bg);
+    color:var(--text);
+}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+
+.topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:18px 5%;border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;
+    background:rgba(247,248,251,.9);backdrop-filter:blur(14px);
+    flex-wrap:wrap;gap:14px;
+}
+.brand{display:flex;gap:14px;align-items:center;}
+.brand-ring{width:44px;height:44px;border-radius:50%;
+    background:conic-gradient(from 220deg, var(--navy) 0deg 90deg, var(--blue) 90deg 180deg, var(--orange) 180deg 270deg, var(--green) 270deg 360deg);
+    display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;
+    box-shadow: var(--shadow);}
+.brand-ring::after{content:'';position:absolute;width:26px;height:26px;border-radius:50%;background:var(--panel);}
+.brand h1{font-size:16px;letter-spacing:.3px;color:var(--text);}
+.brand p{font-size:10.5px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px;}
+
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px;}
+.seg button{
+    border:none;background:transparent;color:var(--muted);font-family:'Inter';font-size:12px;font-weight:600;
+    padding:8px 14px;border-radius:9px;cursor:pointer;transition:.15s;white-space:nowrap;
+}
+.seg button.active{background:var(--navy);color:#fff;}
+.seg button:hover:not(.active){color:var(--text);}
+
+.container{width:90%;max-width:1440px;margin:auto;padding:30px 0 80px;}
+
+.hero{
+    background:linear-gradient(145deg, rgba(52,64,131,.06), var(--panel));
+    border:1px solid var(--line);border-radius:20px;padding:24px 28px;margin-bottom:30px;
+    display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
+    box-shadow:var(--shadow);
+}
+.hero-text h2{font-size:19px;margin-bottom:8px;}
+.hero-text p{font-size:12.5px;color:var(--muted);max-width:720px;line-height:1.65;}
+.hero-badges{display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+.hero-badge{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;
+    padding:6px 12px;border-radius:20px;white-space:nowrap;}
+.hero-badge.ok{color:var(--green-dark);background:rgba(76,138,50,.10);border:1px solid rgba(76,138,50,.25);}
+.hero-badge.warn{color:#b5652f;background:rgba(223,133,88,.12);border:1px solid rgba(223,133,88,.3);}
+
+.section{margin-top:42px;}
+.section-header{display:flex;justify-content:space-between;align-items:end;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.eyebrow{font-size:10px;color:var(--orange);letter-spacing:1.8px;text-transform:uppercase;font-weight:700;}
+.section-title{font-size:19px;margin-top:5px;}
+.section-description{color:var(--muted);font-size:12px;margin-top:5px;max-width:660px;}
+
+.filter-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);}
+.filter-row{display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
+.filter-group{display:flex;flex-direction:column;gap:8px;}
+.filter-group-label{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{
+    border:1px solid var(--line);background:var(--panel2);color:var(--muted);
+    font-family:'JetBrains Mono';font-size:11px;font-weight:600;padding:7px 12px;border-radius:9px;cursor:pointer;transition:.15s;
+}
+.chip.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.chip .bache-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--orange);margin-left:6px;}
+select.day-select{
+    border:1px solid var(--line);background:var(--panel2);color:var(--text);
+    font-family:'JetBrains Mono';font-size:12px;font-weight:600;padding:8px 12px;border-radius:9px;cursor:pointer;
+}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;position:relative;overflow:hidden;box-shadow:var(--shadow);}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent,var(--navy));}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+.kpi-val{font-family:'JetBrains Mono';font-size:24px;font-weight:700;}
+.kpi-sub{font-size:11px;color:var(--muted2);margin-top:6px;}
+.kpi-delta{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;margin-top:8px;padding:3px 8px;border-radius:8px;}
+.kpi-delta.good{color:var(--green-dark);background:rgba(76,138,50,.10);}
+.kpi-delta.bad{color:var(--red);background:rgba(200,67,76,.10);}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);}
+.card-title{font-size:15px;margin-bottom:4px;}
+.card-sub{font-size:11px;color:var(--muted);margin-bottom:16px;}
+.chart{height:290px;}
+.chart.small{height:230px;}
+.chart.tall{height:340px;}
+
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;color:var(--muted2);font-size:10px;text-transform:uppercase;letter-spacing:.8px;padding:0 8px 12px;}
+td{padding:11px 8px;border-top:1px solid var(--line);font-size:12px;}
+td.num{text-align:right;font-family:'JetBrains Mono';}
+.bad{color:var(--red);font-weight:700;}
+.good{color:var(--green-dark);font-weight:700;}
+.warning{color:#b5652f;font-weight:700;}
+.muted{color:var(--muted);}
+tr.bache-row td{background:rgba(223,133,88,.06);}
+tr.day-highlight td{background:rgba(67,143,182,.08);}
+.tag{font-size:9.5px;padding:2px 7px;border-radius:8px;font-weight:700;}
+.tag.jun{background:rgba(223,133,88,.14);color:#b5652f;}
+.tag.jul{background:rgba(67,143,182,.14);color:var(--blue);}
+
+.alert{border-radius:18px;padding:22px;border:1px solid rgba(223,133,88,.25);
+    background:linear-gradient(145deg, rgba(223,133,88,.06), var(--panel));box-shadow:var(--shadow);}
+.alert h3{color:#b5652f;margin-bottom:10px;font-size:15px;}
+.alert ul{margin:10px 0 0 18px;color:var(--muted);font-size:13px;line-height:1.9;}
+.alert ul li b{color:var(--text);}
+
+.alert.blue{border:1px solid rgba(67,143,182,.25);background:linear-gradient(145deg, rgba(67,143,182,.06), var(--panel));}
+.alert.blue h3{color:var(--blue);}
+
+.note{border:1px dashed var(--line);border-radius:14px;padding:16px 18px;color:var(--muted2);font-size:11px;line-height:1.7;margin-top:16px;}
+.note b{color:var(--muted);}
+
+footer{margin-top:60px;text-align:center;color:var(--muted2);font-size:10px;}
+
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;}
+
+.daydetail{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px;padding:14px 16px;background:var(--panel2);border-radius:12px;font-size:12px;color:var(--muted);}
+.daydetail b{color:var(--text);}
+
+@media(max-width:1100px){ .kpis{grid-template-columns:repeat(2,1fr);} .grid-2,.grid-3{grid-template-columns:1fr;} }
+@media(max-width:600px){ .kpis{grid-template-columns:1fr;} .topbar{padding:15px;} .container{width:94%;} .hero{flex-direction:column;align-items:flex-start;} .hero-badges{align-items:flex-start;} }
 </style>
 </head>
 <body>
-<div id="loader">
-  <div class="ld-logo">OPS · <span>INNOVAPEP</span> · INLOTRANS</div>
-  <div class="ld-bar"><div class="ld-fill"></div></div>
-  <div class="ld-txt">Cargando datos del período...</div>
-</div>
-<header class="header">
-  <div class="h-logo">IL</div>
-  <div class="h-text">
-    <div class="h-title"><em>INLOTRANS</em> · <em>INNOVAPEP</em> — Dashboard Consolidado</div>
-    <div class="h-sub" id="hSub">Logística &amp; Operaciones · Cargando…</div>
-  </div>
-  <div class="h-right"><div class="live-pill"><span class="live-dot"></span>Datos Reales</div></div>
+<div id="app">
+<header class="topbar">
+    <div class="brand">
+        <div class="brand-ring"></div>
+        <div>
+            <h1>INNOVA — INDICADORES SEMANALES</h1>
+            <p>INLOTRANS · registro operativo real</p>
+        </div>
+    </div>
+    <div class="controls">
+        <div class="seg" id="mesSeg"></div>
+    </div>
 </header>
-<div class="filter-bar">
-  <span class="filter-label">📅 Período</span>
-  <div class="date-inputs">
-    <input type="date" id="dateFrom" class="date-input" onchange="applyFilter()">
-    <span class="date-sep">→</span>
-    <input type="date" id="dateTo" class="date-input" onchange="applyFilter()">
-  </div>
-  <div class="quick-btns">
-    <button class="qbtn" onclick="setQuick('today',this)">Hoy</button>
-    <button class="qbtn" onclick="setQuick('week',this)">7 días</button>
-    <button class="qbtn" onclick="setQuick('month',this)">Mes actual</button>
-    <button class="qbtn active" onclick="setQuick('all',this)">Todo el período</button>
-  </div>
-  <div class="filter-result" id="filterResult">—</div>
+
+<main class="container">
+
+<section class="hero" id="hero"></section>
+
+<section class="section">
+    <div class="section-header">
+        <div>
+            <div class="eyebrow">01 · Filtros</div>
+            <h2 class="section-title">Filtra por mes completo, corte, semana o día</h2>
+            <p class="section-description">El punto naranja marca semanas con algún día bache (actividad casi nula o nula). El filtro cambia los indicadores (sección 02); las gráficas siempre muestran el mes completo y resaltan tu selección.</p>
+        </div>
+    </div>
+    <div class="filter-card">
+        <div class="filter-row">
+            <div class="filter-group">
+                <div class="filter-group-label">Vista</div>
+                <div class="chip-row" id="modoTabs"></div>
+            </div>
+            <div class="filter-group" id="valorGroupWrap" style="display:none;">
+                <div class="filter-group-label" id="valorGroupLabel">Selección</div>
+                <div class="chip-row" id="valorTabs"></div>
+            </div>
+            <div class="filter-group" id="diaGroupWrap" style="display:none;">
+                <div class="filter-group-label">Día</div>
+                <select class="day-select" id="diaSelect"></select>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-header">
+        <div>
+            <div class="eyebrow">02 · Indicadores clave</div>
+            <h2 class="section-title" id="kpiTitle">¿Cómo va la operación?</h2>
+            <p class="section-description">Cajas totales, cajas cargadas, cajas movidas, cajas descargadas, estibas y tiempos promedio — para el período seleccionado.</p>
+        </div>
+    </div>
+    <div class="kpis" id="kpiGrid"></div>
+    <div class="daydetail" id="dayDetail" style="display:none;"></div>
+</section>
+
+<section class="section">
+    <div class="section-header">
+        <div>
+            <div class="eyebrow">03 · Productividad por semana</div>
+            <h2 class="section-title">Ritmo semanal de operación</h2>
+            <p class="section-description">Haz clic en una barra para filtrar el resto del dashboard por esa semana.</p>
+        </div>
+    </div>
+    <div class="card">
+        <h3 class="card-title">Cajas cargadas y movidas, promedio por día de cada semana</h3>
+        <div class="chart"><canvas id="chartSemanal"></canvas></div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-header">
+        <div>
+            <div class="eyebrow">04 · Tendencia diaria</div>
+            <h2 class="section-title">Cajas totales día a día</h2>
+            <p class="section-description">Los puntos rojos son los baches: días con actividad casi nula o nula. Haz clic en un punto para filtrar por ese día.</p>
+        </div>
+    </div>
+    <div class="card">
+        <div class="chart tall"><canvas id="chartDiario"></canvas></div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-header">
+        <div>
+            <div class="eyebrow">05 · Tiempo de cargue y descargue</div>
+            <h2 class="section-title">¿Dónde se recupera tiempo operativo?</h2>
+            <p class="section-description">Tiempo calculado solo con registros de hora de inicio/fin consistentes (entre 0 y 240 min). Comparamos cargue vs. descargue por semana.</p>
+        </div>
+    </div>
+    <div class="grid-2">
+        <div class="card"><h3 class="card-title">Tiempo promedio: cargue vs. descargue (minutos)</h3><p class="card-sub">Por semana, mes seleccionado</p><div class="chart small"><canvas id="chartTiempo"></canvas></div></div>
+        <div class="card"><h3 class="card-title">Cargues y descargues por día</h3><p class="card-sub">Ritmo de operaciones, promedio diario por semana</p><div class="chart small"><canvas id="chartCargues"></canvas></div></div>
+    </div>
+    <div class="alert blue" id="descargueAlert" style="margin-top:18px;"></div>
+</section>
+
+<section class="section">
+    <div class="section-header">
+        <div>
+            <div class="eyebrow">06 · Turnos y equipos</div>
+            <h2 class="section-title">¿Quién está cargando la operación?</h2>
+        </div>
+    </div>
+    <div class="grid-2" id="turnosCoordWrap"></div>
+</section>
+
+<section class="section">
+    <div class="section-header">
+        <div>
+            <div class="eyebrow">07 · Destinos</div>
+            <h2 class="section-title">Destinos con más operaciones, tiempo de cargue y de descargue</h2>
+        </div>
+    </div>
+    <div class="card">
+        <div class="table-wrap">
+            <table>
+                <thead><tr id="destinosHead"></tr></thead>
+                <tbody id="tablaDestinos"></tbody>
+            </table>
+        </div>
+        <div class="note"><b>Nota:</b> destinos normalizados (se unificaron variantes de escritura/acentos) y se excluyeron etiquetas de proceso ("Cargue", "Devolución", placas, comas sueltas) que no son destinos reales. Tiempo calculado solo con registros de 0–240 min con hora de inicio/fin (o minutos) consistentes.</div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-header">
+        <div>
+            <div class="eyebrow">08 · Baches detectados</div>
+            <h2 class="section-title">Días con actividad casi nula o nula</h2>
+            <p class="section-description">La mayoría son domingos (patrón normal). El que no lo es, queda marcado como una alerta real.</p>
+        </div>
+    </div>
+    <div class="card" id="bachesWrap"></div>
+</section>
+
+<section class="section">
+    <div class="section-header">
+        <div>
+            <div class="eyebrow">09 · Lectura ejecutiva</div>
+            <h2 class="section-title">Qué cambió frente al informe anterior</h2>
+        </div>
+    </div>
+    <div class="alert">
+        <h3>🔍 Correcciones y hallazgos de esta revisión</h3>
+        <ul>
+            <li><b>Ahora se ve el tiempo de descargue, no solo el de cargue:</b> se agregó una serie completa de tiempo promedio de descargue (por día, semana, mes y destino), calculada igual que el de cargue: solo con registros de 0–240 min.</li>
+            <li><b>Julio casi no tiene descargue registrado:</b> de 1.553 registros de julio, solo 234 son descargue (15%) y apenas 229 traen un tiempo válido — contra 300 descargues (22%) en junio. La caja movida de julio es, en la práctica, casi toda cargue. Es una oportunidad real: si el descargue se está haciendo pero no se está registrando con hora de inicio/fin, se está perdiendo visibilidad sobre dónde se puede recuperar tiempo.</li>
+            <li><b>Cajas movidas y estibas confirmadas contra el archivo fuente:</b> julio mueve <b>13.540 cajas/día</b> en promedio (13.539,8) y <b>450 estibas/día</b> (450,5) — recalculado directamente desde el Excel original, coincide con el reporte anterior.</li>
+            <li><b>Nuevos filtros:</b> además de mes y semana, ahora puedes filtrar por <b>corte</b> (1–15 / 16–fin de mes) y por <b>día específico</b> — los indicadores de la sección 02 se recalculan al vuelo con cada filtro.</li>
+            <li><b>Los baches reales son pocos:</b> en junio, los días 7, 21 y 28 (todos domingos) tuvieron actividad casi nula. En julio, el día 30 no tiene ningún registro — vale la pena confirmar con el equipo si simplemente no se registró o no hubo operación ese día.</li>
+            <li><b>El Turno 3 (noche) sigue siendo el más cargado</b> en ambos meses (56% en junio, 61% en julio).</li>
+        </ul>
+    </div>
+</section>
+
+<section class="section">
+    <div class="card">
+        <h3 class="card-title">📋 Nota metodológica</h3>
+        <p style="color:var(--muted);font-size:12.5px;line-height:1.8;">
+            Junio sale de <b style="color:var(--text)">innova_junio_11.xlsx</b> (hoja "Operaciones_Resumen", 1.356 registros reales de junio). Julio sale de <b style="color:var(--text)">innova_julio_2026__1_.xlsx</b> (hoja "Registro de movimientos", 1.553 registros, mes completo del 1 al 31).
+            Los dos archivos tienen estructuras distintas: junio identifica cargue/descargue en la columna "Detalle" y calcula el tiempo con "Hora Inicio"/"Hora Fin" (turnos nocturnos que cruzan medianoche se calculan correctamente); julio trae "Tipo Operación" (Cargue/Descargue) y el tiempo ya calculado en minutos, y el destino real está en <b style="color:var(--text)">"# Pedido"</b> (la columna "destiono" trae una categoría de proceso, no el destino).
+            El tiempo promedio (cargue y descargue) se calculó solo con registros entre 0 y 240 min; julio tenía 48 registros con tiempos negativos y 14 por encima de 240 min, excluidos por ser inconsistencias de digitación.
+            Un día se marca como <b style="color:var(--text)">bache</b> si tuvo menos de 10 registros en total. Los <b style="color:var(--text)">cortes</b> dividen el mes en días 1–15 y 16–fin de mes.
+            El personal y los coordinadores se identifican distinto en cada archivo (nombre completo en junio, solo primer nombre en julio), así que no se combinaron en una sola serie.
+        </p>
+    </div>
+</section>
+
+</main>
+
+<footer>
+    INNOVA · INDICADORES GERENCIALES · INLOTRANS
+    <br><br>
+    Junio (completo) · Julio (completo, 1–31) 2026 · Construido desde el registro operativo real, con filtros por mes, corte, semana y día
+</footer>
 </div>
-<div class="main" id="mainContent">
-  <div class="sh"><div class="sh-title">📦 Resumen General</div><div class="sh-note" id="periodNote">—</div></div>
-  <div class="kpi-grid" id="kpiGeneral"></div>
-  <div class="kpi-grid-5" id="kpiExtra"></div>
-  <div class="sh"><div class="sh-title">⏰ Por Turno</div><div class="sh-note">T1 · T2 · T3</div></div>
-  <div class="card">
-    <div class="card-hd">
-      <div><div class="card-title">⏰ Detalle por Turno</div><div class="card-desc">Cajas, estibas y personas activas en cada turno</div></div>
-      <span class="tag tag-y">3 Turnos</span>
-    </div>
-    <div class="turno-wrap" id="turnoWrap"></div>
-  </div>
-  <div class="sh"><div class="sh-title">📈 Tendencia Diaria</div><div class="sh-note">Pico alto · Pico bajo</div></div>
-  <div class="g13">
-    <div class="card">
-      <div class="card-hd">
-        <div><div class="card-title">📈 Cajas por Día y Turno</div><div class="card-desc">Evolución diaria de cajas movilizadas</div></div>
-        <span class="tag tag-g">Tendencia</span>
-      </div>
-      <div class="cw" style="height:230px"><canvas id="cTend"></canvas></div>
-      <div class="peaks" id="peaks"></div>
-    </div>
-    <div class="card">
-      <div class="card-hd"><div><div class="card-title">📦 Cajas — Cargue vs Descargue</div></div><span class="tag tag-g">Mix</span></div>
-      <div class="cw" style="height:130px"><canvas id="cDonut"></canvas></div>
-      <div style="padding:0 14px 12px;display:flex;flex-direction:column;gap:5px" id="donutLeg"></div>
-    </div>
-    <div class="card">
-      <div class="card-hd"><div><div class="card-title">📐 Estibas — Mix Actividad</div></div><span class="tag tag-b">Mix</span></div>
-      <div class="cw" style="height:130px"><canvas id="cEstibas"></canvas></div>
-      <div style="padding:0 14px 12px;display:flex;flex-direction:column;gap:5px" id="estibasLeg"></div>
-    </div>
-  </div>
-  <div class="sh"><div class="sh-title">👷 Operarios</div><div class="sh-note">Top 10 · Por día</div></div>
-  <div class="card">
-    <div class="card-hd">
-      <div><div class="card-title">👥 Personas activas por día</div><div class="card-desc">Personas únicas registradas cada día, segmentado por turno</div></div>
-      <span class="tag tag-y">Por turno</span>
-    </div>
-    <div class="cw" style="height:170px"><canvas id="cPersDia"></canvas></div>
-    <div class="psummary" id="persSummary"></div>
-  </div>
-  <div class="g21">
-    <div class="card">
-      <div class="card-hd">
-        <div><div class="card-title">🏆 Top 10 — Operarios por Cajas Movilizadas</div><div class="card-desc">Personas que más cajas movieron en el período filtrado</div></div>
-        <span class="tag tag-y">Top 10</span>
-      </div>
-      <div class="cw" style="height:170px"><canvas id="cOps"></canvas></div>
-      <div class="tw">
-        <table><thead><tr><th>#</th><th>Operario</th><th>Turno</th><th>Cajas</th><th>Estibas</th><th>Días</th><th style="width:90px">% Top</th></tr></thead>
-        <tbody id="tbOps"></tbody></table>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-hd">
-        <div><div class="card-title">🥇 MVP del Período</div><div class="card-desc">Operario con mayor volumen de cajas</div></div>
-        <span class="tag tag-r">MVP</span>
-      </div>
-      <div id="mvpCard"></div>
-    </div>
-  </div>
-  <div class="sh"><div class="sh-title">🚛 Vehículos</div><div class="sh-note">Top 10 por placa</div></div>
-  <div class="g2">
-    <div class="card">
-      <div class="card-hd">
-        <div><div class="card-title">🪪 Top 10 Vehículos — Por Cajas</div><div class="card-desc">Placa · Cajas · Estibas · Turno · Tiempo estimado</div></div>
-        <span class="tag tag-y">Volumen</span>
-      </div>
-      <div class="tw">
-        <table><thead><tr><th>#</th><th>Placa</th><th>Cajas</th><th>Estibas</th><th>Ops</th><th>Turno(s)</th><th>T. Est.</th><th style="width:70px">% Top</th></tr></thead>
-        <tbody id="tbVehs"></tbody></table>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-hd">
-        <div><div class="card-title">📊 Cajas por Vehículo</div><div class="card-desc">Comparativo visual — Top 10 placas</div></div>
-        <span class="tag tag-b">Gráfico</span>
-      </div>
-      <div class="cw" style="height:300px"><canvas id="cVehs"></canvas></div>
-    </div>
-  </div>
-  <div class="sh"><div class="sh-title">🔧 Vinipelado y Movest</div><div class="sh-note">Operaciones auxiliares</div></div>
-  <div class="g2">
-    <div class="card">
-      <div class="card-hd">
-        <div><div class="card-title">🎁 Vinipelado — Estibas por turno y fecha</div></div>
-        <span class="tag tag-v">Vinipelado</span>
-      </div>
-      <div class="cw" style="height:190px"><canvas id="cVinip"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-hd">
-        <div><div class="card-title">🔄 Movimiento de Estibas (Movest)</div><div class="card-desc">Traslados internos entre muelles</div></div>
-        <span class="tag tag-b">Movest</span>
-      </div>
-      <div class="tw" style="max-height:230px">
-        <table><thead><tr><th>Fecha</th><th>Turno</th><th>Coordinador</th><th>Origen</th><th>Destino</th><th>Estibas</th></tr></thead>
-        <tbody id="tbMovest"></tbody></table>
-      </div>
-    </div>
-  </div>
-</div>
-<footer>Dashboard Consolidado · <em>LORENA MEDINA</em> · <em>INLOTRANS / INNOVAPEP</em> · 2026 · Datos reales mayo–junio 2026</footer>
-<div class="prog-bar"><div class="prog-fill" id="progFill" style="width:100%"></div></div>
+<script id="data-json" type="application/json">
+{"junio":{"daily":[{"dia":1,"semana":1,"weekday":0,"wd_label":"Lun","fecha_iso":"2026-06-01","cajas_cargadas":8921,"cajas_descargadas":14757,"cajas_movidas":23678,"cajas_vinipeladas":0,"cajas_totales":23678,"estibas_cargadas":464,"estibas_descargadas":203,"estibas_movidas":667,"estibas_vinipeladas":474,"estibas_totales":1141,"cargues":41,"descargues":21,"operaciones":92,"tiempo_cargue_min":21.7,"tiempo_cargue_h":0.36,"tiempo_descargue_min":53.4,"tiempo_descargue_h":0.89,"n_cargue_validos":39,"n_descargue_validos":19,"bache":false},{"dia":2,"semana":1,"weekday":1,"wd_label":"Mar","fecha_iso":"2026-06-02","cajas_cargadas":15931,"cajas_descargadas":6164,"cajas_movidas":22095,"cajas_vinipeladas":1831,"cajas_totales":23926,"estibas_cargadas":415,"estibas_descargadas":170,"estibas_movidas":585,"estibas_vinipeladas":332,"estibas_totales":917,"cargues":35,"descargues":15,"operaciones":73,"tiempo_cargue_min":30.3,"tiempo_cargue_h":0.5,"tiempo_descargue_min":57.5,"tiempo_descargue_h":0.96,"n_cargue_validos":33,"n_descargue_validos":12,"bache":false},{"dia":3,"semana":1,"weekday":2,"wd_label":"Mié","fecha_iso":"2026-06-03","cajas_cargadas":11801,"cajas_descargadas":6108,"cajas_movidas":17909,"cajas_vinipeladas":0,"cajas_totales":17909,"estibas_cargadas":399,"estibas_descargadas":118,"estibas_movidas":517,"estibas_vinipeladas":218,"estibas_totales":735,"cargues":39,"descargues":14,"operaciones":71,"tiempo_cargue_min":48.5,"tiempo_cargue_h":0.81,"tiempo_descargue_min":11.1,"tiempo_descargue_h":0.18,"n_cargue_validos":33,"n_descargue_validos":12,"bache":false},{"dia":4,"semana":1,"weekday":3,"wd_label":"Jue","fecha_iso":"2026-06-04","cajas_cargadas":9430,"cajas_descargadas":7193,"cajas_movidas":16623,"cajas_vinipeladas":562,"cajas_totales":17185,"estibas_cargadas":161,"estibas_descargadas":272,"estibas_movidas":433,"estibas_vinipeladas":94,"estibas_totales":527,"cargues":21,"descargues":18,"operaciones":47,"tiempo_cargue_min":32.0,"tiempo_cargue_h":0.53,"tiempo_descargue_min":67.1,"tiempo_descargue_h":1.12,"n_cargue_validos":21,"n_descargue_validos":17,"bache":false},{"dia":5,"semana":1,"weekday":4,"wd_label":"Vie","fecha_iso":"2026-06-05","cajas_cargadas":4979,"cajas_descargadas":9736,"cajas_movidas":14715,"cajas_vinipeladas":0,"cajas_totales":14715,"estibas_cargadas":459,"estibas_descargadas":433,"estibas_movidas":892,"estibas_vinipeladas":487,"estibas_totales":1379,"cargues":35,"descargues":27,"operaciones":85,"tiempo_cargue_min":37.7,"tiempo_cargue_h":0.63,"tiempo_descargue_min":32.0,"tiempo_descargue_h":0.53,"n_cargue_validos":33,"n_descargue_validos":22,"bache":false},{"dia":6,"semana":1,"weekday":5,"wd_label":"Sáb","fecha_iso":"2026-06-06","cajas_cargadas":4120,"cajas_descargadas":6851,"cajas_movidas":10971,"cajas_vinipeladas":0,"cajas_totales":10971,"estibas_cargadas":261,"estibas_descargadas":307,"estibas_movidas":568,"estibas_vinipeladas":330,"estibas_totales":898,"cargues":23,"descargues":18,"operaciones":72,"tiempo_cargue_min":26.0,"tiempo_cargue_h":0.43,"tiempo_descargue_min":35.0,"tiempo_descargue_h":0.58,"n_cargue_validos":21,"n_descargue_validos":14,"bache":false},{"dia":7,"semana":1,"weekday":6,"wd_label":"Dom","fecha_iso":"2026-06-07","cajas_cargadas":0,"cajas_descargadas":0,"cajas_movidas":0,"cajas_vinipeladas":0,"cajas_totales":0,"estibas_cargadas":14,"estibas_descargadas":30,"estibas_movidas":44,"estibas_vinipeladas":53,"estibas_totales":97,"cargues":1,"descargues":1,"operaciones":6,"tiempo_cargue_min":15.0,"tiempo_cargue_h":0.25,"tiempo_descargue_min":null,"tiempo_descargue_h":null,"n_cargue_validos":1,"n_descargue_validos":0,"bache":true},{"dia":8,"semana":2,"weekday":0,"wd_label":"Lun","fecha_iso":"2026-06-08","cajas_cargadas":5256,"cajas_descargadas":5314,"cajas_movidas":10570,"cajas_vinipeladas":2600,"cajas_totales":13170,"estibas_cargadas":238,"estibas_descargadas":85,"estibas_movidas":323,"estibas_vinipeladas":405,"estibas_totales":728,"cargues":17,"descargues":6,"operaciones":40,"tiempo_cargue_min":28.0,"tiempo_cargue_h":0.47,"tiempo_descargue_min":87.0,"tiempo_descargue_h":1.45,"n_cargue_validos":16,"n_descargue_validos":4,"bache":false},{"dia":9,"semana":2,"weekday":1,"wd_label":"Mar","fecha_iso":"2026-06-09","cajas_cargadas":10397,"cajas_descargadas":6093,"cajas_movidas":16490,"cajas_vinipeladas":0,"cajas_totales":16490,"estibas_cargadas":163,"estibas_descargadas":45,"estibas_movidas":208,"estibas_vinipeladas":135,"estibas_totales":343,"cargues":18,"descargues":8,"operaciones":37,"tiempo_cargue_min":60.2,"tiempo_cargue_h":1.0,"tiempo_descargue_min":10.1,"tiempo_descargue_h":0.17,"n_cargue_validos":18,"n_descargue_validos":8,"bache":false},{"dia":10,"semana":2,"weekday":2,"wd_label":"Mié","fecha_iso":"2026-06-10","cajas_cargadas":14589,"cajas_descargadas":6562,"cajas_movidas":21151,"cajas_vinipeladas":1814,"cajas_totales":22965,"estibas_cargadas":289,"estibas_descargadas":67,"estibas_movidas":356,"estibas_vinipeladas":90,"estibas_totales":446,"cargues":34,"descargues":10,"operaciones":50,"tiempo_cargue_min":61.8,"tiempo_cargue_h":1.03,"tiempo_descargue_min":28.3,"tiempo_descargue_h":0.47,"n_cargue_validos":28,"n_descargue_validos":9,"bache":false},{"dia":11,"semana":2,"weekday":3,"wd_label":"Jue","fecha_iso":"2026-06-11","cajas_cargadas":13863,"cajas_descargadas":6528,"cajas_movidas":20391,"cajas_vinipeladas":0,"cajas_totales":20391,"estibas_cargadas":469,"estibas_descargadas":229,"estibas_movidas":698,"estibas_vinipeladas":374,"estibas_totales":1072,"cargues":38,"descargues":18,"operaciones":73,"tiempo_cargue_min":41.6,"tiempo_cargue_h":0.69,"tiempo_descargue_min":27.9,"tiempo_descargue_h":0.47,"n_cargue_validos":36,"n_descargue_validos":16,"bache":false},{"dia":12,"semana":2,"weekday":4,"wd_label":"Vie","fecha_iso":"2026-06-12","cajas_cargadas":5858,"cajas_descargadas":18130,"cajas_movidas":23988,"cajas_vinipeladas":0,"cajas_totales":23988,"estibas_cargadas":68,"estibas_descargadas":108,"estibas_movidas":176,"estibas_vinipeladas":27,"estibas_totales":203,"cargues":13,"descargues":15,"operaciones":33,"tiempo_cargue_min":15.3,"tiempo_cargue_h":0.26,"tiempo_descargue_min":20.1,"tiempo_descargue_h":0.33,"n_cargue_validos":13,"n_descargue_validos":15,"bache":false},{"dia":13,"semana":2,"weekday":5,"wd_label":"Sáb","fecha_iso":"2026-06-13","cajas_cargadas":16483,"cajas_descargadas":450,"cajas_movidas":16933,"cajas_vinipeladas":0,"cajas_totales":16933,"estibas_cargadas":227,"estibas_descargadas":80,"estibas_movidas":307,"estibas_vinipeladas":103,"estibas_totales":410,"cargues":24,"descargues":4,"operaciones":31,"tiempo_cargue_min":60.7,"tiempo_cargue_h":1.01,"tiempo_descargue_min":27.7,"tiempo_descargue_h":0.46,"n_cargue_validos":18,"n_descargue_validos":3,"bache":false},{"dia":14,"semana":2,"weekday":6,"wd_label":"Dom","fecha_iso":"2026-06-14","cajas_cargadas":748,"cajas_descargadas":3278,"cajas_movidas":4026,"cajas_vinipeladas":1680,"cajas_totales":5706,"estibas_cargadas":56,"estibas_descargadas":78,"estibas_movidas":134,"estibas_vinipeladas":117,"estibas_totales":251,"cargues":4,"descargues":4,"operaciones":13,"tiempo_cargue_min":46.0,"tiempo_cargue_h":0.77,"tiempo_descargue_min":60.0,"tiempo_descargue_h":1.0,"n_cargue_validos":4,"n_descargue_validos":2,"bache":false},{"dia":15,"semana":3,"weekday":0,"wd_label":"Lun","fecha_iso":"2026-06-15","cajas_cargadas":11904,"cajas_descargadas":2836,"cajas_movidas":14740,"cajas_vinipeladas":4725,"cajas_totales":19465,"estibas_cargadas":1496,"estibas_descargadas":40,"estibas_movidas":1536,"estibas_vinipeladas":184,"estibas_totales":1720,"cargues":28,"descargues":4,"operaciones":42,"tiempo_cargue_min":49.1,"tiempo_cargue_h":0.82,"tiempo_descargue_min":5.3,"tiempo_descargue_h":0.09,"n_cargue_validos":24,"n_descargue_validos":3,"bache":false},{"dia":16,"semana":3,"weekday":1,"wd_label":"Mar","fecha_iso":"2026-06-16","cajas_cargadas":6113,"cajas_descargadas":3356,"cajas_movidas":9469,"cajas_vinipeladas":4000,"cajas_totales":13469,"estibas_cargadas":489,"estibas_descargadas":222,"estibas_movidas":711,"estibas_vinipeladas":127,"estibas_totales":838,"cargues":39,"descargues":19,"operaciones":61,"tiempo_cargue_min":19.5,"tiempo_cargue_h":0.32,"tiempo_descargue_min":25.6,"tiempo_descargue_h":0.43,"n_cargue_validos":39,"n_descargue_validos":18,"bache":false},{"dia":17,"semana":3,"weekday":2,"wd_label":"Mié","fecha_iso":"2026-06-17","cajas_cargadas":13694,"cajas_descargadas":5673,"cajas_movidas":19367,"cajas_vinipeladas":0,"cajas_totales":19367,"estibas_cargadas":366,"estibas_descargadas":185,"estibas_movidas":551,"estibas_vinipeladas":211,"estibas_totales":762,"cargues":40,"descargues":14,"operaciones":64,"tiempo_cargue_min":28.3,"tiempo_cargue_h":0.47,"tiempo_descargue_min":43.5,"tiempo_descargue_h":0.73,"n_cargue_validos":35,"n_descargue_validos":13,"bache":false},{"dia":18,"semana":3,"weekday":3,"wd_label":"Jue","fecha_iso":"2026-06-18","cajas_cargadas":9900,"cajas_descargadas":572,"cajas_movidas":10472,"cajas_vinipeladas":7600,"cajas_totales":18072,"estibas_cargadas":310,"estibas_descargadas":139,"estibas_movidas":449,"estibas_vinipeladas":281,"estibas_totales":730,"cargues":33,"descargues":10,"operaciones":54,"tiempo_cargue_min":31.8,"tiempo_cargue_h":0.53,"tiempo_descargue_min":31.5,"tiempo_descargue_h":0.53,"n_cargue_validos":31,"n_descargue_validos":10,"bache":false},{"dia":19,"semana":3,"weekday":4,"wd_label":"Vie","fecha_iso":"2026-06-19","cajas_cargadas":8632,"cajas_descargadas":5861,"cajas_movidas":14493,"cajas_vinipeladas":11200,"cajas_totales":25693,"estibas_cargadas":310,"estibas_descargadas":93,"estibas_movidas":403,"estibas_vinipeladas":496,"estibas_totales":899,"cargues":30,"descargues":10,"operaciones":55,"tiempo_cargue_min":39.2,"tiempo_cargue_h":0.65,"tiempo_descargue_min":36.3,"tiempo_descargue_h":0.61,"n_cargue_validos":29,"n_descargue_validos":6,"bache":false},{"dia":20,"semana":3,"weekday":5,"wd_label":"Sáb","fecha_iso":"2026-06-20","cajas_cargadas":8919,"cajas_descargadas":12165,"cajas_movidas":21084,"cajas_vinipeladas":0,"cajas_totales":21084,"estibas_cargadas":49,"estibas_descargadas":50,"estibas_movidas":99,"estibas_vinipeladas":65,"estibas_totales":164,"cargues":14,"descargues":8,"operaciones":26,"tiempo_cargue_min":46.8,"tiempo_cargue_h":0.78,"tiempo_descargue_min":38.9,"tiempo_descargue_h":0.65,"n_cargue_validos":13,"n_descargue_validos":8,"bache":false},{"dia":21,"semana":3,"weekday":6,"wd_label":"Dom","fecha_iso":"2026-06-21","cajas_cargadas":0,"cajas_descargadas":0,"cajas_movidas":0,"cajas_vinipeladas":0,"cajas_totales":0,"estibas_cargadas":28,"estibas_descargadas":0,"estibas_movidas":28,"estibas_vinipeladas":0,"estibas_totales":28,"cargues":2,"descargues":0,"operaciones":2,"tiempo_cargue_min":12.5,"tiempo_cargue_h":0.21,"tiempo_descargue_min":null,"tiempo_descargue_h":null,"n_cargue_validos":2,"n_descargue_validos":0,"bache":true},{"dia":22,"semana":4,"weekday":0,"wd_label":"Lun","fecha_iso":"2026-06-22","cajas_cargadas":17870,"cajas_descargadas":2069,"cajas_movidas":19939,"cajas_vinipeladas":4600,"cajas_totales":24539,"estibas_cargadas":523,"estibas_descargadas":73,"estibas_movidas":596,"estibas_vinipeladas":137,"estibas_totales":733,"cargues":56,"descargues":10,"operaciones":74,"tiempo_cargue_min":42.1,"tiempo_cargue_h":0.7,"tiempo_descargue_min":52.4,"tiempo_descargue_h":0.87,"n_cargue_validos":53,"n_descargue_validos":8,"bache":false},{"dia":23,"semana":4,"weekday":1,"wd_label":"Mar","fecha_iso":"2026-06-23","cajas_cargadas":11558,"cajas_descargadas":0,"cajas_movidas":11558,"cajas_vinipeladas":5728,"cajas_totales":17286,"estibas_cargadas":200,"estibas_descargadas":97,"estibas_movidas":297,"estibas_vinipeladas":168,"estibas_totales":465,"cargues":25,"descargues":8,"operaciones":40,"tiempo_cargue_min":43.9,"tiempo_cargue_h":0.73,"tiempo_descargue_min":22.3,"tiempo_descargue_h":0.37,"n_cargue_validos":20,"n_descargue_validos":7,"bache":false},{"dia":24,"semana":4,"weekday":2,"wd_label":"Mié","fecha_iso":"2026-06-24","cajas_cargadas":16891,"cajas_descargadas":0,"cajas_movidas":16891,"cajas_vinipeladas":5796,"cajas_totales":22687,"estibas_cargadas":501,"estibas_descargadas":115,"estibas_movidas":616,"estibas_vinipeladas":138,"estibas_totales":754,"cargues":40,"descargues":9,"operaciones":52,"tiempo_cargue_min":51.1,"tiempo_cargue_h":0.85,"tiempo_descargue_min":34.6,"tiempo_descargue_h":0.58,"n_cargue_validos":36,"n_descargue_validos":8,"bache":false},{"dia":25,"semana":4,"weekday":3,"wd_label":"Jue","fecha_iso":"2026-06-25","cajas_cargadas":12533,"cajas_descargadas":0,"cajas_movidas":12533,"cajas_vinipeladas":10060,"cajas_totales":22593,"estibas_cargadas":495,"estibas_descargadas":53,"estibas_movidas":548,"estibas_vinipeladas":268,"estibas_totales":816,"cargues":35,"descargues":6,"operaciones":51,"tiempo_cargue_min":32.0,"tiempo_cargue_h":0.53,"tiempo_descargue_min":28.8,"tiempo_descargue_h":0.48,"n_cargue_validos":32,"n_descargue_validos":6,"bache":false},{"dia":26,"semana":4,"weekday":4,"wd_label":"Vie","fecha_iso":"2026-06-26","cajas_cargadas":7743,"cajas_descargadas":0,"cajas_movidas":7743,"cajas_vinipeladas":7272,"cajas_totales":15015,"estibas_cargadas":481,"estibas_descargadas":353,"estibas_movidas":834,"estibas_vinipeladas":189,"estibas_totales":1023,"cargues":25,"descargues":6,"operaciones":38,"tiempo_cargue_min":24.4,"tiempo_cargue_h":0.41,"tiempo_descargue_min":26.5,"tiempo_descargue_h":0.44,"n_cargue_validos":21,"n_descargue_validos":6,"bache":false},{"dia":27,"semana":4,"weekday":5,"wd_label":"Sáb","fecha_iso":"2026-06-27","cajas_cargadas":7419,"cajas_descargadas":504,"cajas_movidas":7923,"cajas_vinipeladas":4410,"cajas_totales":12333,"estibas_cargadas":85,"estibas_descargadas":61,"estibas_movidas":146,"estibas_vinipeladas":105,"estibas_totales":251,"cargues":14,"descargues":7,"operaciones":25,"tiempo_cargue_min":39.4,"tiempo_cargue_h":0.66,"tiempo_descargue_min":45.9,"tiempo_descargue_h":0.76,"n_cargue_validos":14,"n_descargue_validos":7,"bache":false},{"dia":28,"semana":4,"weekday":6,"wd_label":"Dom","fecha_iso":"2026-06-28","cajas_cargadas":0,"cajas_descargadas":0,"cajas_movidas":0,"cajas_vinipeladas":0,"cajas_totales":0,"estibas_cargadas":0,"estibas_descargadas":0,"estibas_movidas":0,"estibas_vinipeladas":44,"estibas_totales":44,"cargues":0,"descargues":0,"operaciones":1,"tiempo_cargue_min":null,"tiempo_cargue_h":null,"tiempo_descargue_min":null,"tiempo_descargue_h":null,"n_cargue_validos":0,"n_descargue_validos":0,"bache":true},{"dia":29,"semana":5,"weekday":0,"wd_label":"Lun","fecha_iso":"2026-06-29","cajas_cargadas":7693,"cajas_descargadas":2364,"cajas_movidas":10057,"cajas_vinipeladas":0,"cajas_totales":10057,"estibas_cargadas":40,"estibas_descargadas":140,"estibas_movidas":180,"estibas_vinipeladas":55,"estibas_totales":235,"cargues":11,"descargues":6,"operaciones":20,"tiempo_cargue_min":94.0,"tiempo_cargue_h":1.57,"tiempo_descargue_min":30.4,"tiempo_descargue_h":0.51,"n_cargue_validos":9,"n_descargue_validos":5,"bache":false},{"dia":30,"semana":5,"weekday":1,"wd_label":"Mar","fecha_iso":"2026-06-30","cajas_cargadas":6587,"cajas_descargadas":1007,"cajas_movidas":7594,"cajas_vinipeladas":4100,"cajas_totales":11694,"estibas_cargadas":120,"estibas_descargadas":35,"estibas_movidas":155,"estibas_vinipeladas":176,"estibas_totales":331,"cargues":14,"descargues":4,"operaciones":28,"tiempo_cargue_min":24.4,"tiempo_cargue_h":0.41,"tiempo_descargue_min":36.5,"tiempo_descargue_h":0.61,"n_cargue_validos":13,"n_descargue_validos":4,"bache":false}],"weekly":[{"semana":1,"dia_ini":1,"dia_fin":7,"dias":7,"cajas_cargadas":55182,"cajas_descargadas":50809,"cajas_movidas":105991,"cajas_vinipeladas":2393,"cajas_totales":108384,"estibas_totales":5694,"cargues":195,"descargues":114,"operaciones":446,"baches":1,"cajas_cargadas_dia":7883.1,"cajas_movidas_dia":15141.6,"cajas_totales_dia":15483.4,"estibas_totales_dia":813.4,"cargues_dia":27.9,"descargues_dia":16.3,"tiempo_cargue_min":32.7,"tiempo_cargue_h":0.55,"tiempo_descargue_min":43.5,"tiempo_descargue_h":0.72},{"semana":2,"dia_ini":8,"dia_fin":14,"dias":7,"cajas_cargadas":67194,"cajas_descargadas":46355,"cajas_movidas":113549,"cajas_vinipeladas":6094,"cajas_totales":119643,"estibas_totales":3453,"cargues":148,"descargues":65,"operaciones":277,"baches":0,"cajas_cargadas_dia":9599.1,"cajas_movidas_dia":16221.3,"cajas_totales_dia":17091.9,"estibas_totales_dia":493.3,"cargues_dia":21.1,"descargues_dia":9.3,"tiempo_cargue_min":46.9,"tiempo_cargue_h":0.78,"tiempo_descargue_min":28.7,"tiempo_descargue_h":0.48},{"semana":3,"dia_ini":15,"dia_fin":21,"dias":7,"cajas_cargadas":59162,"cajas_descargadas":30463,"cajas_movidas":89625,"cajas_vinipeladas":27525,"cajas_totales":117150,"estibas_totales":5141,"cargues":186,"descargues":65,"operaciones":304,"baches":1,"cajas_cargadas_dia":8451.7,"cajas_movidas_dia":12803.6,"cajas_totales_dia":16735.7,"estibas_totales_dia":734.4,"cargues_dia":26.6,"descargues_dia":9.3,"tiempo_cargue_min":32.9,"tiempo_cargue_h":0.55,"tiempo_descargue_min":32.5,"tiempo_descargue_h":0.54},{"semana":4,"dia_ini":22,"dia_fin":28,"dias":7,"cajas_cargadas":74014,"cajas_descargadas":2573,"cajas_movidas":76587,"cajas_vinipeladas":37866,"cajas_totales":114453,"estibas_totales":4086,"cargues":195,"descargues":46,"operaciones":281,"baches":1,"cajas_cargadas_dia":10573.4,"cajas_movidas_dia":10941.0,"cajas_totales_dia":16350.4,"estibas_totales_dia":583.7,"cargues_dia":27.9,"descargues_dia":6.6,"tiempo_cargue_min":40.0,"tiempo_cargue_h":0.67,"tiempo_descargue_min":35.8,"tiempo_descargue_h":0.6},{"semana":5,"dia_ini":29,"dia_fin":30,"dias":2,"cajas_cargadas":14280,"cajas_descargadas":3371,"cajas_movidas":17651,"cajas_vinipeladas":4100,"cajas_totales":21751,"estibas_totales":566,"cargues":25,"descargues":10,"operaciones":48,"baches":0,"cajas_cargadas_dia":7140.0,"cajas_movidas_dia":8825.5,"cajas_totales_dia":10875.5,"estibas_totales_dia":283.0,"cargues_dia":12.5,"descargues_dia":5.0,"tiempo_cargue_min":52.9,"tiempo_cargue_h":0.88,"tiempo_descargue_min":33.1,"tiempo_descargue_h":0.55}],"summary":{"dias_calendario":30,"dias_con_actividad":27,"baches":3,"total_registros":1356,"cajas_cargadas":269832,"cajas_descargadas":133571,"cajas_movidas":403403,"cajas_totales":481381,"estibas_totales":18940,"cargues":749,"descargues":300,"cajas_cargadas_dia":8994.4,"cajas_movidas_dia":13446.8,"cajas_totales_dia":16046.0,"estibas_totales_dia":631.3,"cargues_dia":25.0,"descargues_dia":10.0,"tiempo_cargue_min":38.0,"tiempo_cargue_h":0.63,"tiempo_descargue_min":36.2,"tiempo_descargue_h":0.6,"n_cargue_validos":685,"n_descargue_validos":262},"turnos":{"3":56.0,"1":19.0,"2":25.0},"coordinadores":[{"nombre":"Torres Pinzon Javier Oswaldo","ops":580,"pct":42.8},{"nombre":"Rodriguez Mojica Sebastian","ops":541,"pct":39.9},{"nombre":"Hernesto Niño Pineda","ops":235,"pct":17.3}],"destinos":[{"destino":"Alquería","ops":86,"tiempo_cargue_min":24.2,"n_cargue":46,"tiempo_descargue_min":null,"n_descargue":0},{"destino":"Montevideo","ops":85,"tiempo_cargue_min":28.1,"n_cargue":35,"tiempo_descargue_min":15.0,"n_descargue":1},{"destino":"Suba","ops":41,"tiempo_cargue_min":35.0,"n_cargue":21,"tiempo_descargue_min":null,"n_descargue":0},{"destino":"3PD","ops":39,"tiempo_cargue_min":71.4,"n_cargue":35,"tiempo_descargue_min":null,"n_descargue":0},{"destino":"Tripidi","ops":35,"tiempo_cargue_min":88.6,"n_cargue":29,"tiempo_descargue_min":60.0,"n_descargue":1},{"destino":"Éxito","ops":32,"tiempo_cargue_min":34.0,"n_cargue":21,"tiempo_descargue_min":null,"n_descargue":0},{"destino":"Toberín","ops":31,"tiempo_cargue_min":22.4,"n_cargue":15,"tiempo_descargue_min":73.7,"n_descargue":3},{"destino":"Abastos","ops":31,"tiempo_cargue_min":35.8,"n_cargue":5,"tiempo_descargue_min":26.9,"n_descargue":24},{"destino":"Jerónimo","ops":27,"tiempo_cargue_min":52.2,"n_cargue":11,"tiempo_descargue_min":null,"n_descargue":0},{"destino":"Soacha","ops":24,"tiempo_cargue_min":22.1,"n_cargue":18,"tiempo_descargue_min":null,"n_descargue":0},{"destino":"Cajicá","ops":22,"tiempo_cargue_min":22.2,"n_cargue":14,"tiempo_descargue_min":null,"n_descargue":0},{"destino":"Occidente","ops":19,"tiempo_cargue_min":19.0,"n_cargue":11,"tiempo_descargue_min":74.5,"n_descargue":2}],"cortes":[{"corte":"Corte 1 (1-15)","dia_ini":1,"dia_fin":15,"dias":15,"cajas_cargadas":134280,"cajas_descargadas":100000,"cajas_movidas":234280,"cajas_totales":247492,"estibas_totales":10867,"cargues":371,"descargues":183,"operaciones":765,"baches":1,"cajas_cargadas_dia":8952.0,"cajas_movidas_dia":15618.7,"cajas_totales_dia":16499.5,"estibas_totales_dia":724.5,"cargues_dia":24.7,"descargues_dia":12.2,"tiempo_cargue_min":39.5,"tiempo_cargue_h":0.66,"tiempo_descargue_min":37.3,"tiempo_descargue_h":0.62},{"corte":"Corte 2 (16-fin)","dia_ini":16,"dia_fin":30,"dias":15,"cajas_cargadas":135552,"cajas_descargadas":33571,"cajas_movidas":169123,"cajas_totales":233889,"estibas_totales":8073,"cargues":378,"descargues":117,"operaciones":591,"baches":2,"cajas_cargadas_dia":9036.8,"cajas_movidas_dia":11274.9,"cajas_totales_dia":15592.6,"estibas_totales_dia":538.2,"cargues_dia":25.2,"descargues_dia":7.8,"tiempo_cargue_min":36.6,"tiempo_cargue_h":0.61,"tiempo_descargue_min":34.7,"tiempo_descargue_h":0.58}]},"julio":{"daily":[{"dia":1,"semana":1,"weekday":2,"wd_label":"Mié","fecha_iso":"2026-07-01","cajas_cargadas":4238,"cajas_descargadas":0,"cajas_movidas":4238,"cajas_vinipeladas":0,"cajas_totales":4238,"estibas_cargadas":383,"estibas_descargadas":75,"estibas_movidas":458,"estibas_vinipeladas":0,"estibas_totales":458,"cargues":33,"descargues":8,"operaciones":41,"tiempo_cargue_min":31.0,"tiempo_cargue_h":0.52,"tiempo_descargue_min":14.8,"tiempo_descargue_h":0.25,"n_cargue_validos":31,"n_descargue_validos":8,"bache":false},{"dia":2,"semana":1,"weekday":3,"wd_label":"Jue","fecha_iso":"2026-07-02","cajas_cargadas":20418,"cajas_descargadas":0,"cajas_movidas":20418,"cajas_vinipeladas":0,"cajas_totales":20418,"estibas_cargadas":358,"estibas_descargadas":0,"estibas_movidas":358,"estibas_vinipeladas":0,"estibas_totales":358,"cargues":37,"descargues":0,"operaciones":37,"tiempo_cargue_min":33.8,"tiempo_cargue_h":0.56,"tiempo_descargue_min":null,"tiempo_descargue_h":null,"n_cargue_validos":36,"n_descargue_validos":0,"bache":false},{"dia":3,"semana":1,"weekday":4,"wd_label":"Vie","fecha_iso":"2026-07-03","cajas_cargadas":7554,"cajas_descargadas":0,"cajas_movidas":7554,"cajas_vinipeladas":0,"cajas_totales":7554,"estibas_cargadas":452,"estibas_descargadas":51,"estibas_movidas":503,"estibas_vinipeladas":0,"estibas_totales":503,"cargues":39,"descargues":4,"operaciones":43,"tiempo_cargue_min":34.3,"tiempo_cargue_h":0.57,"tiempo_descargue_min":22.8,"tiempo_descargue_h":0.38,"n_cargue_validos":37,"n_descargue_validos":4,"bache":false},{"dia":4,"semana":1,"weekday":5,"wd_label":"Sáb","fecha_iso":"2026-07-04","cajas_cargadas":9161,"cajas_descargadas":0,"cajas_movidas":9161,"cajas_vinipeladas":0,"cajas_totales":9161,"estibas_cargadas":218,"estibas_descargadas":35,"estibas_movidas":253,"estibas_vinipeladas":0,"estibas_totales":253,"cargues":26,"descargues":4,"operaciones":30,"tiempo_cargue_min":45.7,"tiempo_cargue_h":0.76,"tiempo_descargue_min":27.0,"tiempo_descargue_h":0.45,"n_cargue_validos":25,"n_descargue_validos":4,"bache":false},{"dia":5,"semana":1,"weekday":6,"wd_label":"Dom","fecha_iso":"2026-07-05","cajas_cargadas":5332,"cajas_descargadas":0,"cajas_movidas":5332,"cajas_vinipeladas":0,"cajas_totales":5332,"estibas_cargadas":393,"estibas_descargadas":98,"estibas_movidas":491,"estibas_vinipeladas":0,"estibas_totales":491,"cargues":34,"descargues":10,"operaciones":44,"tiempo_cargue_min":28.8,"tiempo_cargue_h":0.48,"tiempo_descargue_min":31.5,"tiempo_descargue_h":0.53,"n_cargue_validos":34,"n_descargue_validos":10,"bache":false},{"dia":6,"semana":1,"weekday":0,"wd_label":"Lun","fecha_iso":"2026-07-06","cajas_cargadas":15807,"cajas_descargadas":0,"cajas_movidas":15807,"cajas_vinipeladas":0,"cajas_totales":15807,"estibas_cargadas":269,"estibas_descargadas":49,"estibas_movidas":318,"estibas_vinipeladas":0,"estibas_totales":318,"cargues":33,"descargues":6,"operaciones":39,"tiempo_cargue_min":42.9,"tiempo_cargue_h":0.71,"tiempo_descargue_min":20.0,"tiempo_descargue_h":0.33,"n_cargue_validos":33,"n_descargue_validos":6,"bache":false},{"dia":7,"semana":1,"weekday":1,"wd_label":"Mar","fecha_iso":"2026-07-07","cajas_cargadas":16673,"cajas_descargadas":0,"cajas_movidas":16673,"cajas_vinipeladas":0,"cajas_totales":16673,"estibas_cargadas":613,"estibas_descargadas":92,"estibas_movidas":705,"estibas_vinipeladas":0,"estibas_totales":705,"cargues":66,"descargues":12,"operaciones":78,"tiempo_cargue_min":30.1,"tiempo_cargue_h":0.5,"tiempo_descargue_min":18.2,"tiempo_descargue_h":0.3,"n_cargue_validos":66,"n_descargue_validos":12,"bache":false},{"dia":8,"semana":2,"weekday":2,"wd_label":"Mié","fecha_iso":"2026-07-08","cajas_cargadas":15732,"cajas_descargadas":1183,"cajas_movidas":16915,"cajas_vinipeladas":0,"cajas_totales":16915,"estibas_cargadas":270,"estibas_descargadas":96,"estibas_movidas":366,"estibas_vinipeladas":0,"estibas_totales":366,"cargues":30,"descargues":7,"operaciones":37,"tiempo_cargue_min":45.9,"tiempo_cargue_h":0.77,"tiempo_descargue_min":23.5,"tiempo_descargue_h":0.39,"n_cargue_validos":30,"n_descargue_validos":6,"bache":false},{"dia":9,"semana":2,"weekday":3,"wd_label":"Jue","fecha_iso":"2026-07-09","cajas_cargadas":10084,"cajas_descargadas":0,"cajas_movidas":10084,"cajas_vinipeladas":0,"cajas_totales":10084,"estibas_cargadas":462,"estibas_descargadas":65,"estibas_movidas":527,"estibas_vinipeladas":0,"estibas_totales":527,"cargues":46,"descargues":9,"operaciones":55,"tiempo_cargue_min":34.7,"tiempo_cargue_h":0.58,"tiempo_descargue_min":19.7,"tiempo_descargue_h":0.33,"n_cargue_validos":46,"n_descargue_validos":9,"bache":false},{"dia":10,"semana":2,"weekday":4,"wd_label":"Vie","fecha_iso":"2026-07-10","cajas_cargadas":17816,"cajas_descargadas":0,"cajas_movidas":17816,"cajas_vinipeladas":0,"cajas_totales":17816,"estibas_cargadas":404,"estibas_descargadas":40,"estibas_movidas":444,"estibas_vinipeladas":0,"estibas_totales":444,"cargues":49,"descargues":6,"operaciones":55,"tiempo_cargue_min":48.3,"tiempo_cargue_h":0.81,"tiempo_descargue_min":20.7,"tiempo_descargue_h":0.34,"n_cargue_validos":46,"n_descargue_validos":6,"bache":false},{"dia":11,"semana":2,"weekday":5,"wd_label":"Sáb","fecha_iso":"2026-07-11","cajas_cargadas":12055,"cajas_descargadas":0,"cajas_movidas":12055,"cajas_vinipeladas":0,"cajas_totales":12055,"estibas_cargadas":268,"estibas_descargadas":47,"estibas_movidas":315,"estibas_vinipeladas":0,"estibas_totales":315,"cargues":32,"descargues":7,"operaciones":39,"tiempo_cargue_min":49.4,"tiempo_cargue_h":0.82,"tiempo_descargue_min":17.6,"tiempo_descargue_h":0.29,"n_cargue_validos":31,"n_descargue_validos":7,"bache":false},{"dia":12,"semana":2,"weekday":6,"wd_label":"Dom","fecha_iso":"2026-07-12","cajas_cargadas":6517,"cajas_descargadas":0,"cajas_movidas":6517,"cajas_vinipeladas":0,"cajas_totales":6517,"estibas_cargadas":246,"estibas_descargadas":51,"estibas_movidas":297,"estibas_vinipeladas":0,"estibas_totales":297,"cargues":28,"descargues":7,"operaciones":35,"tiempo_cargue_min":41.2,"tiempo_cargue_h":0.69,"tiempo_descargue_min":24.0,"tiempo_descargue_h":0.4,"n_cargue_validos":26,"n_descargue_validos":7,"bache":false},{"dia":13,"semana":2,"weekday":0,"wd_label":"Lun","fecha_iso":"2026-07-13","cajas_cargadas":16317,"cajas_descargadas":0,"cajas_movidas":16317,"cajas_vinipeladas":0,"cajas_totales":16317,"estibas_cargadas":441,"estibas_descargadas":41,"estibas_movidas":482,"estibas_vinipeladas":0,"estibas_totales":482,"cargues":50,"descargues":5,"operaciones":55,"tiempo_cargue_min":41.4,"tiempo_cargue_h":0.69,"tiempo_descargue_min":14.0,"tiempo_descargue_h":0.23,"n_cargue_validos":49,"n_descargue_validos":5,"bache":false},{"dia":14,"semana":2,"weekday":1,"wd_label":"Mar","fecha_iso":"2026-07-14","cajas_cargadas":14782,"cajas_descargadas":0,"cajas_movidas":14782,"cajas_vinipeladas":0,"cajas_totales":14782,"estibas_cargadas":508,"estibas_descargadas":65,"estibas_movidas":573,"estibas_vinipeladas":0,"estibas_totales":573,"cargues":51,"descargues":9,"operaciones":60,"tiempo_cargue_min":44.6,"tiempo_cargue_h":0.74,"tiempo_descargue_min":11.3,"tiempo_descargue_h":0.19,"n_cargue_validos":51,"n_descargue_validos":9,"bache":false},{"dia":15,"semana":3,"weekday":2,"wd_label":"Mié","fecha_iso":"2026-07-15","cajas_cargadas":13120,"cajas_descargadas":0,"cajas_movidas":13120,"cajas_vinipeladas":0,"cajas_totales":13120,"estibas_cargadas":496,"estibas_descargadas":56,"estibas_movidas":552,"estibas_vinipeladas":0,"estibas_totales":552,"cargues":52,"descargues":8,"operaciones":60,"tiempo_cargue_min":35.6,"tiempo_cargue_h":0.59,"tiempo_descargue_min":10.8,"tiempo_descargue_h":0.18,"n_cargue_validos":49,"n_descargue_validos":8,"bache":false},{"dia":16,"semana":3,"weekday":3,"wd_label":"Jue","fecha_iso":"2026-07-16","cajas_cargadas":14268,"cajas_descargadas":0,"cajas_movidas":14268,"cajas_vinipeladas":0,"cajas_totales":14268,"estibas_cargadas":403,"estibas_descargadas":72,"estibas_movidas":475,"estibas_vinipeladas":0,"estibas_totales":475,"cargues":47,"descargues":9,"operaciones":56,"tiempo_cargue_min":38.0,"tiempo_cargue_h":0.63,"tiempo_descargue_min":12.1,"tiempo_descargue_h":0.2,"n_cargue_validos":44,"n_descargue_validos":9,"bache":false},{"dia":17,"semana":3,"weekday":4,"wd_label":"Vie","fecha_iso":"2026-07-17","cajas_cargadas":13290,"cajas_descargadas":0,"cajas_movidas":13290,"cajas_vinipeladas":0,"cajas_totales":13290,"estibas_cargadas":485,"estibas_descargadas":70,"estibas_movidas":555,"estibas_vinipeladas":0,"estibas_totales":555,"cargues":51,"descargues":9,"operaciones":60,"tiempo_cargue_min":34.8,"tiempo_cargue_h":0.58,"tiempo_descargue_min":12.8,"tiempo_descargue_h":0.21,"n_cargue_validos":48,"n_descargue_validos":8,"bache":false},{"dia":18,"semana":3,"weekday":5,"wd_label":"Sáb","fecha_iso":"2026-07-18","cajas_cargadas":9857,"cajas_descargadas":0,"cajas_movidas":9857,"cajas_vinipeladas":0,"cajas_totales":9857,"estibas_cargadas":119,"estibas_descargadas":17,"estibas_movidas":136,"estibas_vinipeladas":0,"estibas_totales":136,"cargues":19,"descargues":2,"operaciones":23,"tiempo_cargue_min":41.8,"tiempo_cargue_h":0.7,"tiempo_descargue_min":17.5,"tiempo_descargue_h":0.29,"n_cargue_validos":19,"n_descargue_validos":2,"bache":false},{"dia":19,"semana":3,"weekday":6,"wd_label":"Dom","fecha_iso":"2026-07-19","cajas_cargadas":0,"cajas_descargadas":0,"cajas_movidas":0,"cajas_vinipeladas":0,"cajas_totales":0,"estibas_cargadas":70,"estibas_descargadas":6,"estibas_movidas":76,"estibas_vinipeladas":0,"estibas_totales":76,"cargues":6,"descargues":1,"operaciones":8,"tiempo_cargue_min":13.5,"tiempo_cargue_h":0.23,"tiempo_descargue_min":13.0,"tiempo_descargue_h":0.22,"n_cargue_validos":6,"n_descargue_validos":1,"bache":true},{"dia":20,"semana":3,"weekday":0,"wd_label":"Lun","fecha_iso":"2026-07-20","cajas_cargadas":17428,"cajas_descargadas":0,"cajas_movidas":17428,"cajas_vinipeladas":0,"cajas_totales":17428,"estibas_cargadas":289,"estibas_descargadas":75,"estibas_movidas":364,"estibas_vinipeladas":0,"estibas_totales":364,"cargues":38,"descargues":9,"operaciones":48,"tiempo_cargue_min":39.9,"tiempo_cargue_h":0.66,"tiempo_descargue_min":16.9,"tiempo_descargue_h":0.28,"n_cargue_validos":35,"n_descargue_validos":9,"bache":false},{"dia":21,"semana":3,"weekday":1,"wd_label":"Mar","fecha_iso":"2026-07-21","cajas_cargadas":16082,"cajas_descargadas":1109,"cajas_movidas":17191,"cajas_vinipeladas":0,"cajas_totales":17191,"estibas_cargadas":523,"estibas_descargadas":85,"estibas_movidas":608,"estibas_vinipeladas":0,"estibas_totales":608,"cargues":51,"descargues":14,"operaciones":66,"tiempo_cargue_min":39.4,"tiempo_cargue_h":0.66,"tiempo_descargue_min":16.2,"tiempo_descargue_h":0.27,"n_cargue_validos":47,"n_descargue_validos":13,"bache":false},{"dia":22,"semana":4,"weekday":2,"wd_label":"Mié","fecha_iso":"2026-07-22","cajas_cargadas":13482,"cajas_descargadas":0,"cajas_movidas":13482,"cajas_vinipeladas":0,"cajas_totales":13482,"estibas_cargadas":500,"estibas_descargadas":65,"estibas_movidas":565,"estibas_vinipeladas":0,"estibas_totales":565,"cargues":52,"descargues":9,"operaciones":62,"tiempo_cargue_min":29.5,"tiempo_cargue_h":0.49,"tiempo_descargue_min":13.7,"tiempo_descargue_h":0.23,"n_cargue_validos":48,"n_descargue_validos":9,"bache":false},{"dia":23,"semana":4,"weekday":3,"wd_label":"Jue","fecha_iso":"2026-07-23","cajas_cargadas":21749,"cajas_descargadas":0,"cajas_movidas":21749,"cajas_vinipeladas":0,"cajas_totales":21749,"estibas_cargadas":427,"estibas_descargadas":91,"estibas_movidas":518,"estibas_vinipeladas":0,"estibas_totales":518,"cargues":53,"descargues":11,"operaciones":64,"tiempo_cargue_min":43.9,"tiempo_cargue_h":0.73,"tiempo_descargue_min":17.0,"tiempo_descargue_h":0.28,"n_cargue_validos":48,"n_descargue_validos":11,"bache":false},{"dia":24,"semana":4,"weekday":4,"wd_label":"Vie","fecha_iso":"2026-07-24","cajas_cargadas":17747,"cajas_descargadas":0,"cajas_movidas":17747,"cajas_vinipeladas":0,"cajas_totales":17747,"estibas_cargadas":447,"estibas_descargadas":79,"estibas_movidas":526,"estibas_vinipeladas":0,"estibas_totales":526,"cargues":52,"descargues":10,"operaciones":62,"tiempo_cargue_min":32.2,"tiempo_cargue_h":0.54,"tiempo_descargue_min":15.4,"tiempo_descargue_h":0.26,"n_cargue_validos":45,"n_descargue_validos":8,"bache":false},{"dia":25,"semana":4,"weekday":5,"wd_label":"Sáb","fecha_iso":"2026-07-25","cajas_cargadas":15543,"cajas_descargadas":0,"cajas_movidas":15543,"cajas_vinipeladas":0,"cajas_totales":15543,"estibas_cargadas":299,"estibas_descargadas":18,"estibas_movidas":317,"estibas_vinipeladas":0,"estibas_totales":317,"cargues":38,"descargues":4,"operaciones":42,"tiempo_cargue_min":40.9,"tiempo_cargue_h":0.68,"tiempo_descargue_min":14.2,"tiempo_descargue_h":0.24,"n_cargue_validos":37,"n_descargue_validos":4,"bache":false},{"dia":26,"semana":4,"weekday":6,"wd_label":"Dom","fecha_iso":"2026-07-26","cajas_cargadas":3539,"cajas_descargadas":0,"cajas_movidas":3539,"cajas_vinipeladas":0,"cajas_totales":3539,"estibas_cargadas":282,"estibas_descargadas":55,"estibas_movidas":337,"estibas_vinipeladas":0,"estibas_totales":337,"cargues":26,"descargues":7,"operaciones":33,"tiempo_cargue_min":27.8,"tiempo_cargue_h":0.46,"tiempo_descargue_min":18.7,"tiempo_descargue_h":0.31,"n_cargue_validos":26,"n_descargue_validos":7,"bache":false},{"dia":27,"semana":4,"weekday":0,"wd_label":"Lun","fecha_iso":"2026-07-27","cajas_cargadas":21940,"cajas_descargadas":0,"cajas_movidas":21940,"cajas_vinipeladas":0,"cajas_totales":21940,"estibas_cargadas":486,"estibas_descargadas":78,"estibas_movidas":564,"estibas_vinipeladas":0,"estibas_totales":564,"cargues":56,"descargues":10,"operaciones":66,"tiempo_cargue_min":59.0,"tiempo_cargue_h":0.98,"tiempo_descargue_min":16.0,"tiempo_descargue_h":0.27,"n_cargue_validos":54,"n_descargue_validos":10,"bache":false},{"dia":28,"semana":4,"weekday":1,"wd_label":"Mar","fecha_iso":"2026-07-28","cajas_cargadas":16351,"cajas_descargadas":0,"cajas_movidas":16351,"cajas_vinipeladas":0,"cajas_totales":16351,"estibas_cargadas":311,"estibas_descargadas":54,"estibas_movidas":365,"estibas_vinipeladas":0,"estibas_totales":365,"cargues":43,"descargues":7,"operaciones":50,"tiempo_cargue_min":36.1,"tiempo_cargue_h":0.6,"tiempo_descargue_min":15.3,"tiempo_descargue_h":0.25,"n_cargue_validos":43,"n_descargue_validos":7,"bache":false},{"dia":29,"semana":5,"weekday":2,"wd_label":"Mié","fecha_iso":"2026-07-29","cajas_cargadas":37408,"cajas_descargadas":2636,"cajas_movidas":40044,"cajas_vinipeladas":0,"cajas_totales":40044,"estibas_cargadas":908,"estibas_descargadas":132,"estibas_movidas":1040,"estibas_vinipeladas":0,"estibas_totales":1040,"cargues":104,"descargues":19,"operaciones":123,"tiempo_cargue_min":45.6,"tiempo_cargue_h":0.76,"tiempo_descargue_min":32.1,"tiempo_descargue_h":0.54,"n_cargue_validos":100,"n_descargue_validos":19,"bache":false},{"dia":30,"semana":5,"weekday":3,"wd_label":"Jue","fecha_iso":"2026-07-30","cajas_cargadas":0,"cajas_descargadas":0,"cajas_movidas":0,"cajas_vinipeladas":0,"cajas_totales":0,"estibas_cargadas":0,"estibas_descargadas":0,"estibas_movidas":0,"estibas_vinipeladas":0,"estibas_totales":0,"cargues":0,"descargues":0,"operaciones":0,"tiempo_cargue_min":null,"tiempo_cargue_h":null,"tiempo_descargue_min":null,"tiempo_descargue_h":null,"n_cargue_validos":0,"n_descargue_validos":0,"bache":true},{"dia":31,"semana":5,"weekday":4,"wd_label":"Vie","fecha_iso":"2026-07-31","cajas_cargadas":10516,"cajas_descargadas":0,"cajas_movidas":10516,"cajas_vinipeladas":0,"cajas_totales":10516,"estibas_cargadas":792,"estibas_descargadas":87,"estibas_movidas":879,"estibas_vinipeladas":0,"estibas_totales":879,"cargues":71,"descargues":11,"operaciones":82,"tiempo_cargue_min":29.2,"tiempo_cargue_h":0.49,"tiempo_descargue_min":14.0,"tiempo_descargue_h":0.23,"n_cargue_validos":66,"n_descargue_validos":11,"bache":false}],"weekly":[{"semana":1,"dia_ini":1,"dia_fin":7,"dias":7,"cajas_cargadas":79183,"cajas_descargadas":0,"cajas_movidas":79183,"cajas_vinipeladas":0,"cajas_totales":79183,"estibas_totales":3086,"cargues":268,"descargues":44,"operaciones":312,"baches":0,"cajas_cargadas_dia":11311.9,"cajas_movidas_dia":11311.9,"cajas_totales_dia":11311.9,"estibas_totales_dia":440.9,"cargues_dia":38.3,"descargues_dia":6.3,"tiempo_cargue_min":34.2,"tiempo_cargue_h":0.57,"tiempo_descargue_min":22.1,"tiempo_descargue_h":0.37},{"semana":2,"dia_ini":8,"dia_fin":14,"dias":7,"cajas_cargadas":93303,"cajas_descargadas":1183,"cajas_movidas":94486,"cajas_vinipeladas":0,"cajas_totales":94486,"estibas_totales":3004,"cargues":286,"descargues":50,"operaciones":336,"baches":0,"cajas_cargadas_dia":13329.0,"cajas_movidas_dia":13498.0,"cajas_totales_dia":13498.0,"estibas_totales_dia":429.1,"cargues_dia":40.9,"descargues_dia":7.1,"tiempo_cargue_min":43.4,"tiempo_cargue_h":0.72,"tiempo_descargue_min":18.5,"tiempo_descargue_h":0.31},{"semana":3,"dia_ini":15,"dia_fin":21,"dias":7,"cajas_cargadas":84045,"cajas_descargadas":1109,"cajas_movidas":85154,"cajas_vinipeladas":0,"cajas_totales":85154,"estibas_totales":2766,"cargues":264,"descargues":52,"operaciones":321,"baches":1,"cajas_cargadas_dia":12006.4,"cajas_movidas_dia":12164.9,"cajas_totales_dia":12164.9,"estibas_totales_dia":395.1,"cargues_dia":37.7,"descargues_dia":7.4,"tiempo_cargue_min":37.1,"tiempo_cargue_h":0.62,"tiempo_descargue_min":14.2,"tiempo_descargue_h":0.24},{"semana":4,"dia_ini":22,"dia_fin":28,"dias":7,"cajas_cargadas":110351,"cajas_descargadas":0,"cajas_movidas":110351,"cajas_vinipeladas":0,"cajas_totales":110351,"estibas_totales":3192,"cargues":320,"descargues":58,"operaciones":379,"baches":0,"cajas_cargadas_dia":15764.4,"cajas_movidas_dia":15764.4,"cajas_totales_dia":15764.4,"estibas_totales_dia":456.0,"cargues_dia":45.7,"descargues_dia":8.3,"tiempo_cargue_min":39.7,"tiempo_cargue_h":0.66,"tiempo_descargue_min":15.9,"tiempo_descargue_h":0.27},{"semana":5,"dia_ini":29,"dia_fin":31,"dias":3,"cajas_cargadas":47924,"cajas_descargadas":2636,"cajas_movidas":50560,"cajas_vinipeladas":0,"cajas_totales":50560,"estibas_totales":1919,"cargues":175,"descargues":30,"operaciones":205,"baches":1,"cajas_cargadas_dia":15974.7,"cajas_movidas_dia":16853.3,"cajas_totales_dia":16853.3,"estibas_totales_dia":639.7,"cargues_dia":58.3,"descargues_dia":10.0,"tiempo_cargue_min":39.1,"tiempo_cargue_h":0.65,"tiempo_descargue_min":25.5,"tiempo_descargue_h":0.42}],"summary":{"dias_calendario":31,"dias_con_actividad":29,"baches":2,"total_registros":1553,"cajas_cargadas":414806,"cajas_descargadas":4928,"cajas_movidas":419734,"cajas_totales":419734,"estibas_totales":13967,"cargues":1313,"descargues":234,"cajas_cargadas_dia":13380.8,"cajas_movidas_dia":13539.8,"cajas_totales_dia":13539.8,"estibas_totales_dia":450.5,"cargues_dia":42.4,"descargues_dia":7.5,"tiempo_cargue_min":38.8,"tiempo_cargue_h":0.65,"tiempo_descargue_min":18.5,"tiempo_descargue_h":0.31,"n_cargue_validos":1256,"n_descargue_validos":229},"turnos":{"3":60.5,"1":15.4,"2":24.1},"coordinadores":[{"nombre":"Javier","ops":547,"pct":37.4},{"nombre":"Ernesto","ops":509,"pct":34.8},{"nombre":"Mauricio","ops":405,"pct":27.7}],"destinos":[{"destino":"3PD","ops":302,"tiempo_cargue_min":74.1,"n_cargue":283,"tiempo_descargue_min":59.0,"n_descargue":1},{"destino":"Alquería","ops":226,"tiempo_cargue_min":18.9,"n_cargue":219,"tiempo_descargue_min":22.0,"n_descargue":3},{"destino":"Montevideo","ops":140,"tiempo_cargue_min":20.5,"n_cargue":133,"tiempo_descargue_min":15.0,"n_descargue":1},{"destino":"Suba","ops":79,"tiempo_cargue_min":16.2,"n_cargue":78,"tiempo_descargue_min":10.0,"n_descargue":1},{"destino":"Occidente","ops":79,"tiempo_cargue_min":20.1,"n_cargue":76,"tiempo_descargue_min":10.0,"n_descargue":1},{"destino":"Jerónimo","ops":76,"tiempo_cargue_min":34.3,"n_cargue":71,"tiempo_descargue_min":null,"n_descargue":0},{"destino":"Soacha","ops":65,"tiempo_cargue_min":17.9,"n_cargue":62,"tiempo_descargue_min":22.0,"n_descargue":1},{"destino":"Toberín","ops":55,"tiempo_cargue_min":17.8,"n_cargue":49,"tiempo_descargue_min":null,"n_descargue":0},{"destino":"Rafael Uribe","ops":52,"tiempo_cargue_min":19.2,"n_cargue":51,"tiempo_descargue_min":10.0,"n_descargue":1},{"destino":"Cajicá","ops":45,"tiempo_cargue_min":19.2,"n_cargue":42,"tiempo_descargue_min":12.5,"n_descargue":2},{"destino":"Éxito","ops":39,"tiempo_cargue_min":36.2,"n_cargue":33,"tiempo_descargue_min":29.0,"n_descargue":1},{"destino":"Koba","ops":37,"tiempo_cargue_min":77.8,"n_cargue":33,"tiempo_descargue_min":null,"n_descargue":0}],"cortes":[{"corte":"Corte 1 (1-15)","dia_ini":1,"dia_fin":15,"dias":15,"cajas_cargadas":185606,"cajas_descargadas":1183,"cajas_movidas":186789,"cajas_totales":186789,"estibas_totales":6642,"cargues":606,"descargues":102,"operaciones":708,"baches":0,"cajas_cargadas_dia":12373.7,"cajas_movidas_dia":12452.6,"cajas_totales_dia":12452.6,"estibas_totales_dia":442.8,"cargues_dia":40.4,"descargues_dia":6.8,"tiempo_cargue_min":38.7,"tiempo_cargue_h":0.65,"tiempo_descargue_min":19.4,"tiempo_descargue_h":0.32},{"corte":"Corte 2 (16-fin)","dia_ini":16,"dia_fin":31,"dias":16,"cajas_cargadas":229200,"cajas_descargadas":3745,"cajas_movidas":232945,"cajas_totales":232945,"estibas_totales":7325,"cargues":707,"descargues":132,"operaciones":845,"baches":2,"cajas_cargadas_dia":14325.0,"cajas_movidas_dia":14559.1,"cajas_totales_dia":14559.1,"estibas_totales_dia":457.8,"cargues_dia":44.2,"descargues_dia":8.2,"tiempo_cargue_min":38.9,"tiempo_cargue_h":0.65,"tiempo_descargue_min":17.8,"tiempo_descargue_h":0.3}]}}
+</script>
 <script>
-const DATA_B64 = "''' + data_b64 + '''";
+const DATA = JSON.parse(document.getElementById('data-json').textContent);
 
-Chart.defaults.color = '#607a96';
-Chart.defaults.font.family = "'JetBrains Mono', monospace";
-Chart.defaults.font.size = 10;
-const GRID = 'rgba(255,255,255,0.04)';
-const TT = { backgroundColor:'#111a28', borderColor:'rgba(255,255,255,0.09)', borderWidth:1, padding:10, cornerRadius:7, titleColor:'#cad5e2', bodyColor:'#607a96', titleFont:{size:11}, bodyFont:{size:10} };
-const TC = { 'Turno 1':'#f0b429', 'Turno 2':'#38b2f5', 'Turno 3':'#10d4b4' };
+const COLORS = { navy:'#344083', blue:'#438FB6', orange:'#DF8558', green:'#4C8A32', greenDark:'#3c6f28', red:'#c8434c', muted:'#5b6478', muted2:'#828da0' };
+const MES_COLOR = { junio: COLORS.orange, julio: COLORS.blue };
+const MES_LABEL = { junio:'Junio', julio:'Julio' };
 
-let RAW = { cajas:[], estibas:[], vinip:[], movest:[] };
-let FILTERED = { cajas:[], estibas:[], vinip:[], movest:[] };
+// state: mes, modo ('mes'|'semana'|'corte'|'dia'), semanaVal, corteVal, diaVal
+let state = { mes: 'junio', modo: 'mes', semanaVal: null, corteVal: null, diaVal: null };
 let charts = {};
 
-async function loadEmbeddedData() {
-  const bin = atob(DATA_B64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  const stream = new DecompressionStream('gzip');
-  const writer = stream.writable.getWriter();
-  writer.write(bytes); writer.close();
-  const reader = stream.readable.getReader();
-  const chunks = [];
-  while (true) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); }
-  const total = chunks.reduce((s,c) => s+c.length, 0);
-  const out = new Uint8Array(total);
-  let pos = 0;
-  for (const c of chunks) { out.set(c, pos); pos += c.length; }
-  return JSON.parse(new TextDecoder().decode(out));
+function numero(v){ if(v===null||v===undefined) return '—'; return new Intl.NumberFormat('es-CO').format(Math.round(v)); }
+function num1(v){ if(v===null||v===undefined) return '—'; return new Intl.NumberFormat('es-CO',{maximumFractionDigits:1,minimumFractionDigits:1}).format(v); }
+function pct(v){ const s = v>=0?'+':''; return s + v.toFixed(1) + '%'; }
+function horas(min){ if(min===null||min===undefined) return '—'; return (min/60).toFixed(2)+' h'; }
+function mins(min){ if(min===null||min===undefined) return '—'; return Math.round(min)+' min'; }
+
+function destroyCharts(){ Object.values(charts).forEach(c=>c && c.destroy()); charts = {}; }
+
+function weeksFor(mes){ return DATA[mes].weekly; }
+function dailyFor(mes){ return DATA[mes].daily; }
+function cortesFor(mes){ return DATA[mes].cortes; }
+
+// Returns the rows relevant to current filter (for KPI aggregation), and whether it's a single day
+function filteredRows(){
+    const mes = state.mes;
+    const daily = dailyFor(mes);
+    if(state.modo==='mes') return daily;
+    if(state.modo==='semana') return daily.filter(r=>r.semana===state.semanaVal);
+    if(state.modo==='corte'){
+        const c = cortesFor(mes)[state.corteVal];
+        return daily.filter(r=>r.dia>=c.dia_ini && r.dia<=c.dia_fin);
+    }
+    if(state.modo==='dia') return daily.filter(r=>r.dia===state.diaVal);
+    return daily;
 }
 
-function setQuick(q, btn) {
-  document.querySelectorAll('.qbtn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const today = new Date().toISOString().slice(0,10);
-  const fd = document.getElementById('dateFrom'), td = document.getElementById('dateTo');
-  if (q==='today') { fd.value=today; td.value=today; }
-  else if (q==='week') { const w=new Date(); w.setDate(w.getDate()-6); fd.value=w.toISOString().slice(0,10); td.value=today; }
-  else if (q==='month') { const m=new Date(); m.setDate(1); fd.value=m.toISOString().slice(0,10); td.value=today; }
-  else { fd.value=''; td.value=''; }
-  applyFilter();
+function aggFromDaily(rows){
+    const sum = k => rows.reduce((a,r)=>a+r[k],0);
+    const nd = rows.length || 1;
+    const wavg = (fv,fn) => {
+        const tt = rows.reduce((a,r)=> a + (r[fv]||0)*r[fn], 0);
+        const tn = rows.reduce((a,r)=> a + r[fn], 0);
+        return tn ? tt/tn : null;
+    };
+    const baches = rows.filter(r=>r.bache).length;
+    return {
+        dias: rows.length,
+        cajas_cargadas: sum('cajas_cargadas'),
+        cajas_descargadas: sum('cajas_descargadas'),
+        cajas_movidas: sum('cajas_movidas'),
+        cajas_totales: sum('cajas_totales'),
+        estibas_totales: sum('estibas_totales'),
+        cargues: sum('cargues'),
+        descargues: sum('descargues'),
+        baches: baches,
+        cajas_cargadas_dia: sum('cajas_cargadas')/nd,
+        cajas_movidas_dia: sum('cajas_movidas')/nd,
+        cajas_totales_dia: sum('cajas_totales')/nd,
+        estibas_totales_dia: sum('estibas_totales')/nd,
+        cargues_dia: sum('cargues')/nd,
+        descargues_dia: sum('descargues')/nd,
+        tiempo_cargue_min: wavg('tiempo_cargue_min','n_cargue_validos'),
+        tiempo_descargue_min: wavg('tiempo_descargue_min','n_descargue_validos'),
+    };
 }
 
-function applyFilter() {
-  const from = document.getElementById('dateFrom').value;
-  const to = document.getElementById('dateTo').value;
-  const filt = arr => arr.filter(r => { if (from && r.fecha < from) return false; if (to && r.fecha > to) return false; return true; });
-  FILTERED = { cajas:filt(RAW.cajas), estibas:filt(RAW.estibas), vinip:filt(RAW.vinip), movest:filt(RAW.movest) };
-  const tot = FILTERED.cajas.length+FILTERED.estibas.length+FILTERED.vinip.length+FILTERED.movest.length;
-  document.getElementById('filterResult').innerHTML = `<span>${tot.toLocaleString('es-CO')}</span> registros en período`;
-  render();
+function render(){
+    renderTopbarControls();
+    renderHero();
+    renderFilters();
+    renderKPIs();
+    renderCharts();
+    renderTurnosCoordinadores();
+    renderDestinos();
+    renderBaches();
 }
 
-function setDefaultDates() {
-  const all = [...RAW.cajas,...RAW.estibas,...RAW.vinip,...RAW.movest].map(r=>r.fecha).filter(Boolean).sort();
-  if (!all.length) return;
-  document.getElementById('dateFrom').value = all[0];
-  document.getElementById('dateTo').value = all[all.length-1];
-  document.getElementById('periodNote').textContent = `${all[0]} → ${all[all.length-1]}`;
+function renderTopbarControls(){
+    const mesSeg = document.getElementById('mesSeg');
+    mesSeg.innerHTML = ['junio','julio','comparar'].map(m=>{
+        const label = m==='comparar' ? 'Comparar ambos' : MES_LABEL[m];
+        return `<button data-mes="${m}" class="${state.mes===m?'active':''}">${label}</button>`;
+    }).join('');
+    mesSeg.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
+        state.mes = b.dataset.mes; state.modo='mes'; state.semanaVal=null; state.corteVal=null; state.diaVal=null; render();
+    }));
 }
 
-function compute() {
-  const { cajas, estibas, vinip, movest } = FILTERED;
-  const totCaj = cajas.reduce((a,r)=>a+r.cantidad,0);
-  const cajC = cajas.filter(r=>r.operacion==='Cargue').reduce((a,r)=>a+r.cantidad,0);
-  const cajD = cajas.filter(r=>r.operacion==='Descargue').reduce((a,r)=>a+r.cantidad,0);
-  const totEst = estibas.reduce((a,r)=>a+r.cantidad,0);
-  const estC = estibas.filter(r=>r.operacion==='Cargue').reduce((a,r)=>a+r.cantidad,0);
-  const estD = estibas.filter(r=>r.operacion==='Descargue').reduce((a,r)=>a+r.cantidad,0);
-  const totVinipEst = vinip.reduce((a,r)=>a+r.estibas,0);
-  const totVinipCaj = vinip.reduce((a,r)=>a+r.cajas,0);
-  const totMovest = movest.reduce((a,r)=>a+r.cantidad,0);
+function renderHero(){
+    const el = document.getElementById('hero');
+    if(state.mes==='comparar'){
+        el.innerHTML = `
+        <div class="hero-text">
+            <h2>Junio vs. Julio 2026 — con tiempo de cargue y descargue</h2>
+            <p>Esta versión agrega el <b style="color:var(--text)">tiempo promedio de descargue</b> (antes solo se veía cargue) y confirma cifras directamente contra los archivos fuente: julio mueve <b style="color:var(--text)">13.540 cajas/día</b> y <b style="color:var(--text)">450 estibas/día</b> en promedio.</p>
+        </div>
+        <div class="hero-badges">
+            <div class="hero-badge ok">✓ ${numero(DATA.junio.summary.total_registros + DATA.julio.summary.total_registros)} registros reales</div>
+            <div class="hero-badge warn">⚠ descargue casi sin registrar en julio</div>
+        </div>`;
+    } else {
+        const s = DATA[state.mes].summary;
+        el.innerHTML = `
+        <div class="hero-text">
+            <h2>${MES_LABEL[state.mes]} 2026 — ${s.dias_calendario} días, ${s.dias_con_actividad} con actividad</h2>
+            <p>Filtra por mes completo, corte, semana o día en la sección 01. <b style="color:var(--text)">${s.baches} día(s)</b> quedaron marcados como bache (muy poca o ninguna operación registrada).</p>
+        </div>
+        <div class="hero-badges">
+            <div class="hero-badge ok">✓ ${numero(s.total_registros)} registros reales</div>
+            ${s.baches>0 ? `<div class="hero-badge warn">⚠ ${s.baches} bache(s) detectado(s)</div>` : ''}
+        </div>`;
+    }
+}
 
-  const TS = {};
-  ['Turno 1','Turno 2','Turno 3'].forEach(t => {
-    const tc=cajas.filter(r=>r.turno===t), te=estibas.filter(r=>r.turno===t), tv=vinip.filter(r=>r.turno===t);
-    const pset=new Set([...tc.flatMap(r=>r.personas),...te.flatMap(r=>r.personas),...tv.flatMap(r=>r.personas)].filter(p=>p&&p.length>1));
-    TS[t]={ cajas:tc.reduce((a,r)=>a+r.cantidad,0), cajC:tc.filter(r=>r.operacion==='Cargue').reduce((a,r)=>a+r.cantidad,0), cajD:tc.filter(r=>r.operacion==='Descargue').reduce((a,r)=>a+r.cantidad,0), est:te.reduce((a,r)=>a+r.cantidad,0), estC:te.filter(r=>r.operacion==='Cargue').reduce((a,r)=>a+r.cantidad,0), estD:te.filter(r=>r.operacion==='Descargue').reduce((a,r)=>a+r.cantidad,0), vinipEst:tv.reduce((a,r)=>a+r.estibas,0), pers:pset.size };
-  });
+function renderFilters(){
+    const modoWrap = document.getElementById('modoTabs');
+    const valorWrap = document.getElementById('valorGroupWrap');
+    const valorTabs = document.getElementById('valorTabs');
+    const valorLabel = document.getElementById('valorGroupLabel');
+    const diaWrap = document.getElementById('diaGroupWrap');
+    const diaSelect = document.getElementById('diaSelect');
 
-  const dates=[...new Set([...cajas.map(r=>r.fecha),...estibas.map(r=>r.fecha),...vinip.map(r=>r.fecha)].filter(Boolean))].sort();
-  const daily={};
-  dates.forEach(d=>{daily[d]={total:0,cajC:0,cajD:0,byT:{'Turno 1':0,'Turno 2':0,'Turno 3':0},pers:new Set(),persT:{'Turno 1':new Set(),'Turno 2':new Set(),'Turno 3':new Set()}};});
-  cajas.forEach(r=>{
-    if(!daily[r.fecha])return;
-    daily[r.fecha].total+=r.cantidad;
-    if(r.operacion==='Cargue')daily[r.fecha].cajC+=r.cantidad; else daily[r.fecha].cajD+=r.cantidad;
-    daily[r.fecha].byT[r.turno]=(daily[r.fecha].byT[r.turno]||0)+r.cantidad;
-    r.personas.forEach(p=>{daily[r.fecha].pers.add(p);daily[r.fecha].persT[r.turno].add(p);});
-  });
-  estibas.forEach(r=>{if(!daily[r.fecha])return;r.personas.forEach(p=>{daily[r.fecha].pers.add(p);daily[r.fecha].persT[r.turno].add(p);});});
+    if(state.mes==='comparar'){
+        modoWrap.innerHTML = `<span style="font-size:11.5px;color:var(--muted);">En modo "Comparar ambos" los filtros de corte/semana/día se desactivan — usa el mes individual para verlos.</span>`;
+        valorWrap.style.display='none'; diaWrap.style.display='none';
+        return;
+    }
 
-  let maxDay={fecha:'',val:0},minDay={fecha:'',val:Infinity};
-  dates.forEach(d=>{const v=daily[d].total;if(v>maxDay.val)maxDay={fecha:d,val:v};if(v>0&&v<minDay.val)minDay={fecha:d,val:v};});
-  if(minDay.val===Infinity)minDay={fecha:'—',val:0};
+    const modos = [['mes','Mes completo'],['semana','Por semana'],['corte','Por corte'],['dia','Por día']];
+    modoWrap.innerHTML = modos.map(([k,l])=>`<button class="chip ${state.modo===k?'active':''}" data-modo="${k}">${l}</button>`).join('');
+    modoWrap.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
+        state.modo = b.dataset.modo;
+        if(state.modo==='semana' && state.semanaVal===null) state.semanaVal = weeksFor(state.mes)[0].semana;
+        if(state.modo==='corte' && state.corteVal===null) state.corteVal = 0;
+        if(state.modo==='dia' && state.diaVal===null) state.diaVal = dailyFor(state.mes)[0].dia;
+        render();
+    }));
 
-  const pmap={};
-  [...cajas,...estibas,...vinip].forEach(r=>{
-    const isV='estibas'in r&&!('operacion'in r);
-    r.personas.forEach(p=>{
-      if(!p||p.length<2)return;
-      if(!pmap[p])pmap[p]={cajas:0,estibas:0,ops:0,turnos:{},fechas:new Set()};
-      pmap[p].ops++;pmap[p].fechas.add(r.fecha);
-      if(!pmap[p].turnos[r.turno])pmap[p].turnos[r.turno]=0;
-      pmap[p].turnos[r.turno]++;
-      if(!isV&&r.operacion)pmap[p].cajas+=r.cantidad||0;
-      else if(isV)pmap[p].estibas+=r.estibas||0;
-      else pmap[p].estibas+=r.cantidad||0;
+    if(state.modo==='semana'){
+        valorWrap.style.display=''; diaWrap.style.display='none';
+        valorLabel.textContent = 'Semana';
+        const weeks = weeksFor(state.mes);
+        if(state.semanaVal===null) state.semanaVal = weeks[0].semana;
+        valorTabs.innerHTML = weeks.map(w=>`<button class="chip ${state.semanaVal===w.semana?'active':''}" data-w="${w.semana}">Sem ${w.semana} (${w.dia_ini}–${w.dia_fin})${w.baches>0?'<span class="bache-dot"></span>':''}</button>`).join('');
+        valorTabs.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{ state.semanaVal=parseInt(b.dataset.w); render(); }));
+    } else if(state.modo==='corte'){
+        valorWrap.style.display=''; diaWrap.style.display='none';
+        valorLabel.textContent = 'Corte';
+        const cortes = cortesFor(state.mes);
+        if(state.corteVal===null) state.corteVal = 0;
+        valorTabs.innerHTML = cortes.map((c,i)=>`<button class="chip ${state.corteVal===i?'active':''}" data-c="${i}">${c.corte}${c.baches>0?'<span class="bache-dot"></span>':''}</button>`).join('');
+        valorTabs.querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{ state.corteVal=parseInt(b.dataset.c); render(); }));
+    } else if(state.modo==='dia'){
+        valorWrap.style.display='none'; diaWrap.style.display='';
+        const daily = dailyFor(state.mes);
+        if(state.diaVal===null) state.diaVal = daily[0].dia;
+        diaSelect.innerHTML = daily.map(d=>`<option value="${d.dia}" ${state.diaVal===d.dia?'selected':''}>${d.fecha_iso} · ${d.wd_label}${d.bache?' ⚠ bache':''}</option>`).join('');
+        diaSelect.onchange = ()=>{ state.diaVal=parseInt(diaSelect.value); render(); };
+    } else {
+        valorWrap.style.display='none'; diaWrap.style.display='none';
+    }
+}
+
+function kpiCard(label, val, sub, accent, delta){
+    return `<div class="kpi" style="--accent:${accent}">
+        <div class="kpi-label">${label}</div>
+        <div class="kpi-val" style="color:${accent}">${val}</div>
+        <div class="kpi-sub">${sub}</div>
+        ${delta!==undefined ? `<div class="kpi-delta ${delta>=0?'good':'bad'}">${delta>=0?'▲':'▼'} ${pct(delta)} vs. junio</div>` : ''}
+    </div>`;
+}
+
+function renderKPIs(){
+    const el = document.getElementById('kpiGrid');
+    const dayDetailEl = document.getElementById('dayDetail');
+    if(state.mes==='comparar'){
+        dayDetailEl.style.display='none';
+        const j = DATA.junio.summary, l = DATA.julio.summary;
+        const defs = [
+            {label:'Cajas totales / día', jv:j.cajas_totales_dia, lv:l.cajas_totales_dia, dec:0},
+            {label:'Cajas cargadas / día', jv:j.cajas_cargadas_dia, lv:l.cajas_cargadas_dia, dec:0},
+            {label:'Cajas movidas / día', jv:j.cajas_movidas_dia, lv:l.cajas_movidas_dia, dec:0},
+            {label:'Cargues / día', jv:j.cargues_dia, lv:l.cargues_dia, dec:1},
+            {label:'Tiempo prom. de cargue', jv:Math.round(j.tiempo_cargue_min), lv:Math.round(l.tiempo_cargue_min), suf:' min', dec:0},
+            {label:'Tiempo prom. de descargue', jv:Math.round(j.tiempo_descargue_min), lv:Math.round(l.tiempo_descargue_min), suf:' min', dec:0},
+            {label:'Estibas totales / día', jv:j.estibas_totales_dia, lv:l.estibas_totales_dia, dec:0},
+            {label:'Días bache', jv:j.baches, lv:l.baches, dec:0, noDelta:true},
+        ];
+        el.innerHTML = defs.map(d=>{
+            const delta = d.jv ? ((d.lv-d.jv)/d.jv*100) : 0;
+            return `<div class="kpi">
+                <div class="kpi-label">${d.label}</div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                    <div><div style="font-size:9px;color:${COLORS.orange};text-transform:uppercase;letter-spacing:1px;">Junio</div><div class="kpi-val" style="font-size:18px;color:${COLORS.orange}">${d.dec?num1(d.jv):numero(d.jv)}${d.suf||''}</div></div>
+                    <div style="text-align:right"><div style="font-size:9px;color:${COLORS.blue};text-transform:uppercase;letter-spacing:1px;">Julio</div><div class="kpi-val" style="font-size:18px;color:${COLORS.blue}">${d.dec?num1(d.lv):numero(d.lv)}${d.suf||''}</div></div>
+                </div>
+                ${!d.noDelta ? `<div class="kpi-delta ${delta>=0?'good':'bad'}" style="margin-top:10px;">${delta>=0?'▲':'▼'} ${pct(delta)}</div>` : `<div class="kpi-sub" style="margin-top:10px;">días marcados como bache</div>`}
+            </div>`;
+        }).join('');
+        return;
+    }
+    const rows = filteredRows();
+    const a = aggFromDaily(rows);
+    const accent = MES_COLOR[state.mes];
+    el.innerHTML = [
+        kpiCard('Cajas totales / día', numero(a.cajas_totales_dia), `${numero(a.cajas_totales)} en el período`, accent),
+        kpiCard('Cajas cargadas / día', numero(a.cajas_cargadas_dia), `${numero(a.cajas_cargadas)} cajas cargadas`, accent),
+        kpiCard('Cajas descargadas / día', numero(a.cajas_descargadas/a.dias), `${numero(a.cajas_descargadas)} cajas descargadas`, accent),
+        kpiCard('Cajas movidas / día', numero(a.cajas_movidas_dia), `cargue + descargue`, accent),
+        kpiCard('Tiempo prom. de cargue', mins(a.tiempo_cargue_min), a.tiempo_cargue_min!==null ? `promedio por operación` : 'sin datos válidos', accent),
+        kpiCard('Tiempo prom. de descargue', mins(a.tiempo_descargue_min), a.tiempo_descargue_min!==null ? `promedio por operación` : 'sin datos válidos', accent),
+        kpiCard('Estibas totales / día', numero(a.estibas_totales_dia), `${numero(a.estibas_totales)} en el período`, accent),
+        kpiCard('Baches detectados', a.baches, a.baches>0 ? 'días con actividad casi nula' : 'sin baches en este período', a.baches>0?COLORS.orange:COLORS.green),
+    ].join('');
+
+    if(state.modo==='dia'){
+        const d = rows[0];
+        dayDetailEl.style.display='flex';
+        dayDetailEl.innerHTML = `
+            <span><b>${d.fecha_iso}</b> · ${d.wd_label}${d.bache?' · <span style="color:var(--red)">⚠ día bache</span>':''}</span>
+            <span>· <b>${numero(d.operaciones)}</b> operaciones</span>
+            <span>· <b>${numero(d.cargues)}</b> cargues (${d.n_cargue_validos} con tiempo válido)</span>
+            <span>· <b>${numero(d.descargues)}</b> descargues (${d.n_descargue_validos} con tiempo válido)</span>
+            <span>· estibas totales <b>${numero(d.estibas_totales)}</b></span>
+        `;
+    } else {
+        dayDetailEl.style.display='none';
+    }
+}
+
+const baseScales = {
+    x:{ ticks:{ color: COLORS.muted2 }, grid:{ color:'rgba(20,25,45,.06)' } },
+    y:{ ticks:{ color: COLORS.muted2 }, grid:{ color:'rgba(20,25,45,.06)' } }
+};
+const baseOpts = { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color: COLORS.muted } } } };
+
+function hexA(hex, a){
+    const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+}
+
+function currentSelectedWeek(){
+    if(state.modo==='semana') return state.semanaVal;
+    if(state.modo==='dia'){
+        const d = dailyFor(state.mes).find(x=>x.dia===state.diaVal);
+        return d ? d.semana : null;
+    }
+    return null;
+}
+
+function renderCharts(){
+    destroyCharts();
+    if(state.mes==='comparar'){ renderCompareCharts(); return; }
+
+    const mes = state.mes;
+    const accent = MES_COLOR[mes];
+    const weeks = weeksFor(mes);
+
+    const ctx1 = document.getElementById('chartSemanal');
+    charts.semanal = new Chart(ctx1, {
+        type:'bar',
+        data:{
+            labels: weeks.map(w=>`Sem ${w.semana}\n(${w.dia_ini}-${w.dia_fin})`),
+            datasets:[
+                { label:'Cajas cargadas/día', data:weeks.map(w=>w.cajas_cargadas_dia), backgroundColor:accent, borderRadius:6 },
+                { label:'Cajas movidas/día', data:weeks.map(w=>w.cajas_movidas_dia), backgroundColor:COLORS.navy, borderRadius:6 },
+            ]
+        },
+        options:{ ...baseOpts, scales: baseScales, onClick:(evt,elems)=>{
+            if(elems.length){ const idx=elems[0].index; state.modo='semana'; state.semanaVal = weeks[idx].semana; render(); }
+        }}
     });
-  });
-  const personas=Object.entries(pmap).map(([name,s])=>({name,cajas:s.cajas,estibas:s.estibas,ops:s.ops,dias:s.fechas.size,mainT:Object.entries(s.turnos).sort((a,b)=>b[1]-a[1])[0]?.[0]||'N/A'})).sort((a,b)=>b.cajas-a.cajas);
 
-  const vmap={};
-  [...cajas,...estibas].forEach(r=>{
-    if(!r.placa||r.placa==='-'||r.placa==='NAN')return;
-    if(!vmap[r.placa])vmap[r.placa]={cajas:0,est:0,ops:0,turnos:new Set()};
-    vmap[r.placa].ops++;vmap[r.placa].turnos.add(r.turno);
-    if(r.operacion!==undefined)vmap[r.placa].cajas+=r.cantidad||0;
-    else vmap[r.placa].est+=r.cantidad||0;
-  });
-  const vehs=Object.entries(vmap).map(([p,s])=>({placa:p,cajas:s.cajas,est:s.est,ops:s.ops,turnos:[...s.turnos],hrsEst:Math.round(Math.max(0.5,s.cajas/500)*10)/10})).sort((a,b)=>b.cajas-a.cajas);
+    const daily = dailyFor(mes);
+    const selWeek = currentSelectedWeek();
+    const selDia = state.modo==='dia' ? state.diaVal : null;
+    const ptColors = daily.map(d=> d.bache ? COLORS.red : (d.dia===selDia ? COLORS.navy : (selWeek===null || d.semana===selWeek ? accent : 'rgba(130,141,160,.35)')));
+    const ptRadius = daily.map(d=> d.dia===selDia ? 8 : (d.bache ? 6 : (selWeek===null || d.semana===selWeek ? 3 : 2)));
+    const ctx2 = document.getElementById('chartDiario');
+    charts.diario = new Chart(ctx2, {
+        type:'line',
+        data:{
+            labels: daily.map(d=>`${d.dia} ${d.wd_label}`),
+            datasets:[
+                { label:'Cajas totales', data: daily.map(d=>d.cajas_totales), borderColor:accent, backgroundColor: hexA(accent,.12), tension:.3, fill:true, pointBackgroundColor:ptColors, pointRadius:ptRadius, pointHoverRadius:7 },
+            ]
+        },
+        options:{ ...baseOpts, plugins:{...baseOpts.plugins, tooltip:{callbacks:{afterLabel:(c)=>{
+            const d = daily[c.dataIndex]; return d.bache ? '⚠ Día marcado como bache' : '';
+        }}}}, scales: baseScales, onClick:(evt,elems)=>{
+            if(elems.length){ const idx=elems[0].index; state.modo='dia'; state.diaVal = daily[idx].dia; render(); }
+        }}
+    });
 
-  const vdates=[...new Set(vinip.map(r=>r.fecha).filter(Boolean))].sort();
-  const vdaily={};
-  vdates.forEach(d=>vdaily[d]={'Turno 1':0,'Turno 2':0,'Turno 3':0});
-  vinip.forEach(r=>{if(!vdaily[r.fecha])return;vdaily[r.fecha][r.turno]=(vdaily[r.fecha][r.turno]||0)+r.estibas;});
+    const ctx3 = document.getElementById('chartTiempo');
+    charts.tiempo = new Chart(ctx3, {
+        type:'bar',
+        data:{ labels: weeks.map(w=>`Sem ${w.semana}`), datasets:[
+            { label:'Cargue (min)', data: weeks.map(w=>w.tiempo_cargue_min), backgroundColor: COLORS.green, borderRadius:6 },
+            { label:'Descargue (min)', data: weeks.map(w=>w.tiempo_descargue_min), backgroundColor: COLORS.orange, borderRadius:6 }
+        ]},
+        options:{ ...baseOpts, scales: baseScales }
+    });
 
-  const uniqT=t=>[...new Set(cajas.filter(r=>r.turno===t).flatMap(r=>r.personas).filter(p=>p&&p.length>1))].length;
-  return { totCaj,cajC,cajD,totEst,estC,estD,totVinipEst,totVinipCaj,totMovest,TS,dates,daily,personas,vehs,maxDay,minDay,vdates,vdaily,movest,totalPersonas:Object.keys(pmap).length,t1P:uniqT('Turno 1'),t2P:uniqT('Turno 2'),t3P:uniqT('Turno 3') };
+    const ctx4 = document.getElementById('chartCargues');
+    charts.cargues = new Chart(ctx4, {
+        type:'bar',
+        data:{ labels: weeks.map(w=>`Sem ${w.semana}`), datasets:[
+            { label:'Cargues/día', data: weeks.map(w=>w.cargues_dia), backgroundColor: accent, borderRadius:6 },
+            { label:'Descargues/día', data: weeks.map(w=>w.descargues_dia), backgroundColor: COLORS.navy, borderRadius:6 }
+        ]},
+        options:{ ...baseOpts, scales: baseScales }
+    });
+
+    renderDescargueAlert(mes, weeks);
 }
 
-const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':String(n);
-const fmtN=n=>Number(n).toLocaleString('es-CO');
-function hex2rgb(h){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return`${r},${g},${b}`;}
-function avatarClr(n){const c=['#f0b429','#10d4b4','#38b2f5','#a78bfa','#22c55e','#f5576c','#fb923c'];let h=0;for(const ch of n)h=(h*31+ch.charCodeAt(0))&0xffffffff;return c[Math.abs(h)%c.length];}
-function shortDate(d){return d&&d.length>=7?d.slice(5).replace('-','/'):'—';}
-function mkChart(id,type,data,opts){if(charts[id])charts[id].destroy();const el=document.getElementById(id);if(!el)return;charts[id]=new Chart(el,{type,data,options:opts});}
-
-function render() {
-  const C=compute();
-  rKPI(C);rKPIExtra(C);rTurno(C);rTend(C);rDonut(C);rEstibasMix(C);rPeaks(C);
-  rPersDia(C);rOps(C);rMVP(C);rVehs(C);rVehChart(C);rVinip(C);rMovest(C);
+function renderDescargueAlert(mes, weeks){
+    const s = DATA[mes].summary;
+    const el = document.getElementById('descargueAlert');
+    const pctDescargue = (s.descargues / s.total_registros * 100).toFixed(1);
+    const pctConTiempo = s.descargues ? (s.n_descargue_validos / s.descargues * 100).toFixed(0) : 0;
+    // find week with worst (highest) descargue time
+    const validWeeks = weeks.filter(w=>w.tiempo_descargue_min!==null);
+    let peor = null;
+    validWeeks.forEach(w=>{ if(!peor || w.tiempo_descargue_min > peor.tiempo_descargue_min) peor = w; });
+    el.innerHTML = `
+        <h3>⏱ Oportunidad de recuperación en descargue — ${MES_LABEL[mes]}</h3>
+        <ul>
+            <li>El descargue representa <b>${pctDescargue}%</b> de los registros del mes (${numero(s.descargues)} de ${numero(s.total_registros)}), y de esos, solo el <b>${pctConTiempo}%</b> trae un tiempo válido (hora inicio/fin consistente) para medirlo.</li>
+            ${peor ? `<li>La semana con mayor tiempo promedio de descargue es la <b>Semana ${peor.semana}</b> (${num1(peor.tiempo_descargue_min)} min, ${numero(peor.n_descargue_validos===undefined?0:peor.n_descargue_validos)} registros con tiempo válido) — punto de partida si se quiere revisar procedimiento en muelle.</li>` : `<li>No hay suficientes registros de descargue con tiempo válido este mes para identificar la semana más lenta — la prioridad aquí es mejorar el registro, no el proceso.</li>`}
+            <li>Tiempo promedio de descargue del mes: <b>${s.tiempo_descargue_min!==null ? Math.round(s.tiempo_descargue_min)+' min' : 'sin datos suficientes'}</b>, frente a <b>${Math.round(s.tiempo_cargue_min)} min</b> de cargue.</li>
+        </ul>`;
 }
 
-function rKPI(C){
-  const pctC=C.totCaj?Math.round(C.cajC/C.totCaj*100):0;
-  document.getElementById('kpiGeneral').innerHTML=[
-    {ac:'#f0b429',ico:'📦',lbl:'Total Cajas Movilizadas',val:fmt(C.totCaj),sub:`<b>${fmtN(C.cajC)}</b> cargadas · <b>${fmtN(C.cajD)}</b> descargadas`},
-    {ac:'#10d4b4',ico:'🚛',lbl:'Cajas Cargadas',val:fmt(C.cajC),sub:`<b>${pctC}%</b> del total`},
-    {ac:'#f5576c',ico:'⬇️',lbl:'Cajas Descargadas',val:fmt(C.cajD),sub:`<b>${100-pctC}%</b> del total`},
-    {ac:'#38b2f5',ico:'📐',lbl:'Estibas C/D Movilizadas',val:fmtN(C.totEst),sub:`Cargue <b>${fmtN(C.estC)}</b> · Desc <b>${fmtN(C.estD)}</b>`},
-  ].map(k=>`<div class="kpi" style="--ac:${k.ac}"><span class="kpi-icon">${k.ico}</span><div class="kpi-label">${k.lbl}</div><div class="kpi-value">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+function renderCompareCharts(){
+    const wj = weeksFor('junio'), wl = weeksFor('julio');
+    const ctx1 = document.getElementById('chartSemanal');
+    charts.semanal = new Chart(ctx1, {
+        type:'bar',
+        data:{ labels:['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5'], datasets:[
+            { label:'Junio — cajas totales/día', data: wj.map(w=>w.cajas_totales_dia), backgroundColor: COLORS.orange, borderRadius:6 },
+            { label:'Julio — cajas totales/día', data: wl.map(w=>w.cajas_totales_dia), backgroundColor: COLORS.blue, borderRadius:6 },
+        ]},
+        options:{ ...baseOpts, scales: baseScales }
+    });
+
+    const dj = dailyFor('junio'), dl = dailyFor('julio');
+    const ctx2 = document.getElementById('chartDiario');
+    charts.diario = new Chart(ctx2, {
+        type:'line',
+        data:{ labels: Array.from({length:31},(_,i)=>i+1), datasets:[
+            { label:'Junio', data: dj.map(d=>d.cajas_totales), borderColor:COLORS.orange, backgroundColor:hexA(COLORS.orange,.1), tension:.3, fill:true },
+            { label:'Julio', data: dl.map(d=>d.cajas_totales), borderColor:COLORS.blue, backgroundColor:hexA(COLORS.blue,.1), tension:.3, fill:true },
+        ]},
+        options:{ ...baseOpts, scales: baseScales }
+    });
+
+    const ctx3 = document.getElementById('chartTiempo');
+    charts.tiempo = new Chart(ctx3, {
+        type:'bar',
+        data:{ labels:['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5'], datasets:[
+            { label:'Junio — cargue (min)', data: wj.map(w=>w.tiempo_cargue_min), backgroundColor: COLORS.orange, borderRadius:6 },
+            { label:'Julio — cargue (min)', data: wl.map(w=>w.tiempo_cargue_min), backgroundColor: COLORS.blue, borderRadius:6 },
+            { label:'Junio — descargue (min)', data: wj.map(w=>w.tiempo_descargue_min), backgroundColor: hexA(COLORS.orange,.4), borderRadius:6 },
+            { label:'Julio — descargue (min)', data: wl.map(w=>w.tiempo_descargue_min), backgroundColor: hexA(COLORS.blue,.4), borderRadius:6 },
+        ]},
+        options:{ ...baseOpts, scales: baseScales }
+    });
+
+    const ctx4 = document.getElementById('chartCargues');
+    charts.cargues = new Chart(ctx4, {
+        type:'bar',
+        data:{ labels:['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5'], datasets:[
+            { label:'Junio — cargues/día', data: wj.map(w=>w.cargues_dia), backgroundColor: COLORS.orange, borderRadius:6 },
+            { label:'Julio — cargues/día', data: wl.map(w=>w.cargues_dia), backgroundColor: COLORS.blue, borderRadius:6 },
+        ]},
+        options:{ ...baseOpts, scales: baseScales }
+    });
+
+    const j = DATA.junio.summary, l = DATA.julio.summary;
+    const el = document.getElementById('descargueAlert');
+    el.innerHTML = `
+        <h3>⏱ Oportunidad de recuperación en descargue — Junio vs. Julio</h3>
+        <ul>
+            <li>En junio el descargue fue el <b>${(j.descargues/j.total_registros*100).toFixed(1)}%</b> de los registros (${numero(j.descargues)}); en julio bajó al <b>${(l.descargues/l.total_registros*100).toFixed(1)}%</b> (${numero(l.descargues)}) — casi toda la operación de julio quedó registrada como cargue.</li>
+            <li>Tiempo promedio de descargue: junio <b>${num1(j.tiempo_descargue_min)} min</b> vs. julio <b>${num1(l.tiempo_descargue_min)} min</b> — la caída no necesariamente significa que el descargue mejoró; puede ser que se está registrando menos.</li>
+            <li>Cajas movidas por día: junio <b>${numero(j.cajas_movidas_dia)}</b>, julio <b>${numero(l.cajas_movidas_dia)}</b>. Estibas por día: junio <b>${numero(j.estibas_totales_dia)}</b>, julio <b>${numero(l.estibas_totales_dia)}</b>.</li>
+        </ul>`;
 }
 
-function rKPIExtra(C){
-  const n=FILTERED.cajas.length+FILTERED.estibas.length+FILTERED.vinip.length+FILTERED.movest.length;
-  document.getElementById('kpiExtra').innerHTML=[
-    {ac:'#a78bfa',ico:'🎁',lbl:'Estibas Vinipeladas',val:fmtN(C.totVinipEst),sub:`Cajas vinip: <b>${fmtN(C.totVinipCaj)}</b>`},
-    {ac:'#fb923c',ico:'🔄',lbl:'Movest (Estibas)',val:fmtN(C.totMovest),sub:`Traslados entre muelles`},
-    {ac:'#22c55e',ico:'👷',lbl:'Operarios Únicos',val:fmtN(C.totalPersonas),sub:`T1·<b>${C.t1P}</b> T2·<b>${C.t2P}</b> T3·<b>${C.t3P}</b>`},
-    {ac:'#f0b429',ico:'📅',lbl:'Días con Actividad',val:C.dates.length,sub:`<b>${C.dates[0]||'—'}</b> → <b>${C.dates[C.dates.length-1]||'—'}</b>`},
-    {ac:'#38b2f5',ico:'📋',lbl:'Registros en Filtro',val:fmtN(n),sub:`Cajas·${FILTERED.cajas.length} Est·${FILTERED.estibas.length} Vin·${FILTERED.vinip.length}`},
-  ].map(k=>`<div class="kpi" style="--ac:${k.ac}"><span class="kpi-icon">${k.ico}</span><div class="kpi-label">${k.lbl}</div><div class="kpi-value">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+function renderTurnosCoordinadores(){
+    const wrap = document.getElementById('turnosCoordWrap');
+    wrap.innerHTML = `<div class="card"><h3 class="card-title">Participación por turno</h3><p class="card-sub">% de operaciones registradas en cada turno</p><div class="chart small"><canvas id="chartTurnos"></canvas></div></div>
+    <div class="card"><h3 class="card-title">Participación por coordinador</h3><p class="card-sub">% de operaciones registradas bajo cada jefe de operaciones</p><div class="chart small"><canvas id="chartCoord"></canvas></div></div>`;
+
+    const ctxT = document.getElementById('chartTurnos');
+    if(state.mes==='comparar'){
+        charts.turnos = new Chart(ctxT, { type:'bar', data:{ labels:['Turno 1','Turno 2','Turno 3'], datasets:[
+            { label:'Junio', data:[DATA.junio.turnos['1'],DATA.junio.turnos['2'],DATA.junio.turnos['3']], backgroundColor:COLORS.orange, borderRadius:6 },
+            { label:'Julio', data:[DATA.julio.turnos['1'],DATA.julio.turnos['2'],DATA.julio.turnos['3']], backgroundColor:COLORS.blue, borderRadius:6 },
+        ]}, options:{...baseOpts, scales:{...baseScales, y:{...baseScales.y, ticks:{...baseScales.y.ticks, callback:v=>v+'%'}}}}});
+    } else {
+        const t = DATA[state.mes].turnos;
+        charts.turnos = new Chart(ctxT, { type:'bar', data:{ labels:['Turno 1','Turno 2','Turno 3'], datasets:[
+            { label: MES_LABEL[state.mes], data:[t['1'],t['2'],t['3']], backgroundColor:[COLORS.navy,COLORS.blue,COLORS.orange], borderRadius:6 },
+        ]}, options:{...baseOpts, plugins:{legend:{display:false}}, scales:{...baseScales, y:{...baseScales.y, ticks:{...baseScales.y.ticks, callback:v=>v+'%'}}}}});
+    }
+
+    const ctxC = document.getElementById('chartCoord');
+    if(state.mes==='comparar'){
+        const names = Array.from(new Set([...DATA.junio.coordinadores.map(c=>c.nombre), ...DATA.julio.coordinadores.map(c=>c.nombre)]));
+        const getval = (arr,name) => { const f = arr.find(c=>c.nombre===name); return f? f.pct : 0; };
+        charts.coord = new Chart(ctxC, { type:'bar', data:{ labels:names, datasets:[
+            { label:'Junio', data: names.map(n=>getval(DATA.junio.coordinadores,n)), backgroundColor:COLORS.orange, borderRadius:6 },
+            { label:'Julio', data: names.map(n=>getval(DATA.julio.coordinadores,n)), backgroundColor:COLORS.blue, borderRadius:6 },
+        ]}, options:{...baseOpts, indexAxis:'y', scales:{ x:{...baseScales.x, ticks:{...baseScales.x.ticks, callback:v=>v+'%'}}, y:{...baseScales.y, grid:{display:false}} }}});
+    } else {
+        const c = DATA[state.mes].coordinadores;
+        charts.coord = new Chart(ctxC, { type:'bar', data:{ labels:c.map(x=>x.nombre), datasets:[
+            { label:'% operaciones', data:c.map(x=>x.pct), backgroundColor:COLORS.green, borderRadius:6 },
+        ]}, options:{...baseOpts, indexAxis:'y', plugins:{legend:{display:false}}, scales:{ x:{...baseScales.x, ticks:{...baseScales.x.ticks, callback:v=>v+'%'}}, y:{...baseScales.y, grid:{display:false}} }}});
+    }
 }
 
-function rTurno(C){
-  const names={'Turno 1':'T1 · 6am – 7pm','Turno 2':'T2 · Mixto','Turno 3':'T3 · 7pm – 6am'};
-  const maxC=Math.max(...['Turno 1','Turno 2','Turno 3'].map(t=>C.TS[t]?.cajas||0),1);
-  document.getElementById('turnoWrap').innerHTML=['Turno 1','Turno 2','Turno 3'].map(t=>{
-    const s=C.TS[t]||{cajas:0,cajC:0,cajD:0,est:0,estC:0,estD:0,vinipEst:0,pers:0};
-    const pct=Math.round(s.cajas/maxC*100),col=TC[t];
-    return `<div class="tb"><div class="tb-header"><div class="tb-name" style="color:${col}">${names[t]}</div><span class="t-badge" style="background:rgba(${hex2rgb(col)},.1);color:${col};border:1px solid rgba(${hex2rgb(col)},.2)">${s.pers} pers.</span></div><div class="tb-big" style="color:${col}">${fmtN(s.cajas)}</div><div class="tb-biglbl">cajas movilizadas</div><div class="tb-grid"><div class="tb-metric"><div class="tb-mv" style="color:var(--teal)">${fmtN(s.cajC)}</div><div class="tb-ml">Cargue cajas</div></div><div class="tb-metric"><div class="tb-mv" style="color:var(--coral)">${fmtN(s.cajD)}</div><div class="tb-ml">Descargue caj</div></div><div class="tb-metric"><div class="tb-mv" style="color:var(--sky)">${fmtN(s.est)}</div><div class="tb-ml">Estibas C/D</div></div><div class="tb-metric"><div class="tb-mv" style="color:var(--violet)">${fmtN(s.vinipEst)}</div><div class="tb-ml">Vinipelado</div></div><div class="tb-metric"><div class="tb-mv" style="color:var(--muted3)">${fmtN(s.estC)}</div><div class="tb-ml">Est. Cargue</div></div><div class="tb-metric"><div class="tb-mv" style="color:var(--gold)">${fmtN(s.estD)}</div><div class="tb-ml">Est. Descargue</div></div></div><div class="tb-bar"><div class="tb-fill" style="width:${pct}%;background:${col}"></div></div><div class="tb-pct">${pct}% del total</div></div>`;
-  }).join('');
+function renderDestinos(){
+    const el = document.getElementById('tablaDestinos');
+    const head = document.getElementById('destinosHead');
+    if(state.mes==='comparar'){
+        head.innerHTML = `<th>Destino</th><th class="num">Ops. Jun</th><th class="num">Cargue Jun</th><th class="num">Descargue Jun</th><th class="num">Ops. Jul</th><th class="num">Cargue Jul</th><th class="num">Descargue Jul</th>`;
+        const names = Array.from(new Set([...DATA.junio.destinos.map(d=>d.destino), ...DATA.julio.destinos.map(d=>d.destino)]));
+        const gj = n => DATA.junio.destinos.find(d=>d.destino===n);
+        const gl = n => DATA.julio.destinos.find(d=>d.destino===n);
+        el.innerHTML = names.map(n=>{
+            const j = gj(n), l = gl(n);
+            return `<tr>
+                <td>${n}</td>
+                <td class="num">${j?numero(j.ops):'<span class="muted">—</span>'}</td>
+                <td class="num">${j&&j.tiempo_cargue_min?Math.round(j.tiempo_cargue_min)+' min':'<span class="muted">—</span>'}</td>
+                <td class="num">${j&&j.tiempo_descargue_min?Math.round(j.tiempo_descargue_min)+' min':'<span class="muted">—</span>'}</td>
+                <td class="num">${l?numero(l.ops):'<span class="muted">—</span>'}</td>
+                <td class="num">${l&&l.tiempo_cargue_min?Math.round(l.tiempo_cargue_min)+' min':'<span class="muted">—</span>'}</td>
+                <td class="num">${l&&l.tiempo_descargue_min?Math.round(l.tiempo_descargue_min)+' min':'<span class="muted">—</span>'}</td>
+            </tr>`;
+        }).join('');
+    } else {
+        head.innerHTML = `<th>Destino</th><th class="num">Operaciones</th><th class="num">Tiempo prom. cargue</th><th class="num">Tiempo prom. descargue</th>`;
+        const list = DATA[state.mes].destinos;
+        el.innerHTML = list.map(d=>`<tr>
+            <td>${d.destino}</td>
+            <td class="num">${numero(d.ops)}</td>
+            <td class="num">${d.tiempo_cargue_min?Math.round(d.tiempo_cargue_min)+' min <span class="muted">('+d.n_cargue+')</span>':'<span class="muted">—</span>'}</td>
+            <td class="num">${d.tiempo_descargue_min?Math.round(d.tiempo_descargue_min)+' min <span class="muted">('+d.n_descargue+')</span>':'<span class="muted">sin datos</span>'}</td>
+        </tr>`).join('');
+    }
 }
 
-function rTend(C){
-  mkChart('cTend','line',{labels:C.dates.map(shortDate),datasets:[
-    {label:'T1',data:C.dates.map(d=>C.daily[d].byT['Turno 1']||0),borderColor:'#f0b429',borderWidth:2,pointRadius:2.5,pointHoverRadius:5,pointBackgroundColor:'#f0b429',pointBorderColor:'#0d1320',pointBorderWidth:2,tension:.3,fill:false},
-    {label:'T2',data:C.dates.map(d=>C.daily[d].byT['Turno 2']||0),borderColor:'#38b2f5',borderWidth:2,pointRadius:2.5,pointHoverRadius:5,pointBackgroundColor:'#38b2f5',pointBorderColor:'#0d1320',pointBorderWidth:2,tension:.3,fill:false},
-    {label:'T3',data:C.dates.map(d=>C.daily[d].byT['Turno 3']||0),borderColor:'#10d4b4',borderWidth:2,pointRadius:2.5,pointHoverRadius:5,pointBackgroundColor:'#10d4b4',pointBorderColor:'#0d1320',pointBorderWidth:2,tension:.3,fill:false},
-    {label:'Total',data:C.dates.map(d=>C.daily[d].total||0),borderColor:'rgba(255,255,255,.12)',borderWidth:1.5,borderDash:[4,4],pointRadius:0,tension:.3,fill:false},
-  ]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:7,padding:12,usePointStyle:true,pointStyle:'circle',color:'#607a96'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+fmtN(c.parsed.y)+' cajas'}}},scales:{x:{grid:{color:GRID},ticks:{maxRotation:40,color:'#3d5575',maxTicksLimit:20}},y:{grid:{color:GRID},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v,color:'#3d5575'}}}});
+function renderBaches(){
+    const el = document.getElementById('bachesWrap');
+    const meses = state.mes==='comparar' ? ['junio','julio'] : [state.mes];
+    let rows = [];
+    meses.forEach(m=>{
+        DATA[m].daily.filter(d=>d.bache).forEach(d=>{
+            rows.push({mes:m, ...d});
+        });
+    });
+    if(rows.length===0){ el.innerHTML = `<p style="color:var(--muted);font-size:12.5px;">No se detectaron baches en el período seleccionado.</p>`; return; }
+    el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Día</th><th>Mes</th><th class="num">Operaciones</th><th class="num">Cajas totales</th><th>Diagnóstico</th></tr></thead><tbody>
+        ${rows.map(r=>`<tr class="bache-row">
+            <td class="mono">${r.fecha_iso}</td>
+            <td>${r.wd_label}</td>
+            <td><span class="tag ${r.mes==='junio'?'jun':'jul'}">${MES_LABEL[r.mes]}</span></td>
+            <td class="num">${r.operaciones}</td>
+            <td class="num">${numero(r.cajas_totales)}</td>
+            <td class="warning">${r.operaciones===0 ? 'Sin ningún registro — vacío total' : (r.wd_label==='Dom' ? 'Domingo, actividad mínima habitual' : 'Actividad muy por debajo del promedio')}</td>
+        </tr>`).join('')}
+    </tbody></table></div>`;
 }
 
-function rPeaks(C){
-  document.getElementById('peaks').innerHTML=`<div class="pk hi"><div class="pk-label">🔝 Día pico · Más alto</div><div class="pk-date">${shortDate(C.maxDay.fecha)}</div><div class="pk-val">${fmtN(C.maxDay.val)} cajas</div></div><div class="pk lo"><div class="pk-label">📉 Día valle · Más bajo</div><div class="pk-date">${shortDate(C.minDay.fecha)}</div><div class="pk-val">${fmtN(C.minDay.val)} cajas</div></div>`;
-}
+render();
 
-function rDonut(C){
-  const vals=[C.cajC,C.cajD],total=vals.reduce((a,v)=>a+v,0)||1;
-  mkChart('cDonut','doughnut',{labels:['Cargadas','Descargadas'],datasets:[{data:vals,backgroundColor:['#10d4b4','#f5576c'],borderColor:'#0d1320',borderWidth:4,hoverOffset:5}]},{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fmtN(c.parsed)+' cajas'}}}});
-  document.getElementById('donutLeg').innerHTML=[['Cargadas',C.cajC,'#10d4b4'],['Descargadas',C.cajD,'#f5576c']].map(([l,v,c])=>`<div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:50%;background:${c};flex-shrink:0"></span><span style="font-size:11px;color:var(--muted2);flex:1">${l}</span><span style="font-family:var(--mono);font-size:14px;font-weight:700;color:${c}">${fmtN(v)}</span><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">${Math.round(v/total*100)}%</span></div>`).join('');
-}
-
-function rEstibasMix(C){
-  const vals=[C.estC,C.estD,C.totVinipEst,C.totMovest],total=vals.reduce((a,v)=>a+v,0)||1;
-  mkChart('cEstibas','doughnut',{labels:['Est. Cargue','Est. Descargue','Vinipelado','Movest'],datasets:[{data:vals,backgroundColor:['#38b2f5','#a78bfa','#f0b429','#fb923c'],borderColor:'#0d1320',borderWidth:4,hoverOffset:5}]},{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fmtN(c.parsed)+' estibas'}}}});
-  document.getElementById('estibasLeg').innerHTML=[['Est. Cargue',C.estC,'#38b2f5'],['Est. Descargue',C.estD,'#a78bfa'],['Vinipelado',C.totVinipEst,'#f0b429'],['Movest',C.totMovest,'#fb923c']].map(([l,v,c])=>`<div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:50%;background:${c};flex-shrink:0"></span><span style="font-size:10px;color:var(--muted2);flex:1">${l}</span><span style="font-family:var(--mono);font-size:14px;font-weight:700;color:${c}">${fmtN(v)}</span><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">${Math.round(v/total*100)}%</span></div>`).join('');
-}
-
-function rPersDia(C){
-  mkChart('cPersDia','bar',{labels:C.dates.map(shortDate),datasets:[
-    {label:'T1',data:C.dates.map(d=>C.daily[d].persT['Turno 1'].size||0),backgroundColor:'rgba(240,180,41,.75)',borderRadius:3,stack:'p'},
-    {label:'T2',data:C.dates.map(d=>C.daily[d].persT['Turno 2'].size||0),backgroundColor:'rgba(56,178,245,.75)',borderRadius:3,stack:'p'},
-    {label:'T3',data:C.dates.map(d=>C.daily[d].persT['Turno 3'].size||0),backgroundColor:'rgba(16,212,180,.75)',borderRadius:3,stack:'p'},
-  ]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:7,padding:12,usePointStyle:true,pointStyle:'circle',color:'#607a96'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+c.parsed.y+' pers.'}}},scales:{x:{grid:{display:false},ticks:{maxRotation:40,color:'#3d5575',maxTicksLimit:20}},y:{grid:{color:GRID},stacked:true,ticks:{stepSize:1,callback:v=>Math.round(v)===v?v:'',color:'#3d5575'}}}});
-  document.getElementById('persSummary').innerHTML=`<div class="pb"><div class="pb-val" style="color:var(--teal)">${C.totalPersonas}</div><div class="pb-lbl">Únicos total</div></div><div class="pb"><div class="pb-val" style="color:var(--gold)">${C.t1P}</div><div class="pb-lbl">T1 · 6am–7pm</div></div><div class="pb"><div class="pb-val" style="color:var(--sky)">${C.t2P}</div><div class="pb-lbl">T2 · Mixto</div></div><div class="pb"><div class="pb-val" style="color:var(--teal)">${C.t3P}</div><div class="pb-lbl">T3 · 7pm–6am</div></div>`;
-}
-
-function rOps(C){
-  const top=C.personas.slice(0,10),maxC=top[0]?.cajas||1;
-  mkChart('cOps','bar',{labels:top.map(p=>p.name.split(' ')[0]),datasets:[{label:'Cajas',data:top.map(p=>p.cajas),backgroundColor:top.map((_,i)=>i===0?'#f0b429':i<3?'rgba(16,212,180,.8)':'rgba(16,212,180,.3)'),borderRadius:4,borderSkipped:false}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>' '+fmtN(c.parsed.y)+' cajas'}}},scales:{x:{grid:{display:false},ticks:{color:'#3d5575'}},y:{grid:{color:GRID},ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v,color:'#3d5575'}}}});
-  const rnk=['rk1','rk2','rk3'];
-  document.getElementById('tbOps').innerHTML=top.map((p,i)=>{
-    const pct=Math.round(p.cajas/maxC*100),col=TC[p.mainT]||'#607a96';
-    return `<tr><td><span class="rk ${rnk[i]||''}">${i+1}</span></td><td style="font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis">${p.name}</td><td><span class="t-badge" style="background:rgba(${hex2rgb(col)},.1);color:${col};border:1px solid rgba(${hex2rgb(col)},.2)">${p.mainT.replace('Turno ','T')}</span></td><td><b style="color:var(--teal);font-family:var(--mono);font-weight:700">${fmtN(p.cajas)}</b></td><td style="color:var(--sky)">${fmtN(p.estibas)}</td><td style="color:var(--muted2)">${p.dias}</td><td><div style="display:flex;align-items:center;gap:5px"><div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:var(--teal)"></div></div><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:26px">${pct}%</span></div></td></tr>`;
-  }).join('')||'<tr><td colspan="7" class="empty">Sin datos</td></tr>';
-}
-
-function rMVP(C){
-  if(!C.personas.length){document.getElementById('mvpCard').innerHTML='<div class="empty">Sin datos</div>';return;}
-  const p=C.personas[0],col=TC[p.mainT]||'#607a96',ac=avatarClr(p.name);
-  const init=p.name.split(' ').slice(0,2).map(w=>w[0]||'').join('');
-  document.getElementById('mvpCard').innerHTML=`<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><div class="mvp-avatar" style="background:rgba(${hex2rgb(ac)},.15);border:2px solid ${ac}50;color:${ac}">${init}</div><div><div class="mvp-name">${p.name}</div><div class="mvp-sub" style="color:${col}">${p.mainT} · ${p.dias} día${p.dias!==1?'s':''}</div><div class="mvp-trophy">🏆 MVP del período</div></div></div><div class="mvp-stats"><div class="mvp-stat"><div class="mvp-sv" style="color:var(--teal)">${fmtN(p.cajas)}</div><div class="mvp-sl">Cajas movilizadas</div></div><div class="mvp-stat"><div class="mvp-sv" style="color:var(--sky)">${fmtN(p.estibas)}</div><div class="mvp-sl">Estibas movidas</div></div><div class="mvp-stat"><div class="mvp-sv" style="color:var(--muted3)">${p.ops}</div><div class="mvp-sl">Registros de turno</div></div><div class="mvp-stat"><div class="mvp-sv" style="color:var(--gold)">${p.dias}</div><div class="mvp-sl">Días activos</div></div></div>`;
-}
-
-function rVehs(C){
-  const top=C.vehs.slice(0,10),maxV=top[0]?.cajas||1;
-  const rnk=['rk1','rk2','rk3'];
-  document.getElementById('tbVehs').innerHTML=top.map((v,i)=>{
-    const pct=Math.round(v.cajas/maxV*100),col=v.turnos.length===1?(TC[v.turnos[0]]||'#607a96'):'#a78bfa';
-    const hrs=v.hrsEst<1?`${Math.round(v.hrsEst*60)}min`:`~${v.hrsEst}h`;
-    return `<tr><td><span class="rk ${rnk[i]||''}">${i+1}</span></td><td style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.8px">${v.placa}</td><td><b style="font-family:var(--mono);font-weight:700;color:var(--teal)">${fmtN(v.cajas)}</b></td><td style="color:var(--sky)">${fmtN(v.est)}</td><td style="color:var(--muted2)">${v.ops}</td><td><span class="t-badge" style="background:rgba(${hex2rgb(col)},.1);color:${col};border:1px solid rgba(${hex2rgb(col)},.2)">${v.turnos.map(t=>t.replace('Turno ','')).join('/')}</span></td><td style="font-family:var(--mono);font-size:10px;color:var(--orange)">${hrs}</td><td><div style="display:flex;align-items:center;gap:4px"><div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:var(--gold)"></div></div></div></td></tr>`;
-  }).join('')||'<tr><td colspan="8" class="empty">Sin datos</td></tr>';
-}
-
-function rVehChart(C){
-  const top=C.vehs.slice(0,10);
-  mkChart('cVehs','bar',{labels:top.map(v=>v.placa),datasets:[{label:'Cajas',data:top.map(v=>v.cajas),backgroundColor:'rgba(240,180,41,.8)',borderRadius:3,stack:'v'},{label:'Estibas',data:top.map(v=>v.est),backgroundColor:'rgba(56,178,245,.45)',borderRadius:3,stack:'v'}]},{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{position:'top',labels:{boxWidth:7,padding:10,usePointStyle:true,pointStyle:'circle',color:'#607a96'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+fmtN(c.parsed.x)}}},scales:{x:{grid:{color:GRID},stacked:true,ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v,color:'#3d5575'}},y:{grid:{display:false},stacked:true,ticks:{font:{size:9},color:'#8aa3bc'}}}});
-}
-
-function rVinip(C){
-  mkChart('cVinip','bar',{labels:C.vdates.map(shortDate),datasets:[{label:'T1',data:C.vdates.map(d=>C.vdaily[d]?.['Turno 1']||0),backgroundColor:'rgba(240,180,41,.75)',borderRadius:3,stack:'v'},{label:'T2',data:C.vdates.map(d=>C.vdaily[d]?.['Turno 2']||0),backgroundColor:'rgba(56,178,245,.75)',borderRadius:3,stack:'v'},{label:'T3',data:C.vdates.map(d=>C.vdaily[d]?.['Turno 3']||0),backgroundColor:'rgba(16,212,180,.75)',borderRadius:3,stack:'v'}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:7,padding:10,usePointStyle:true,pointStyle:'circle',color:'#607a96'}},tooltip:{...TT,callbacks:{label:c=>' '+c.dataset.label+': '+fmtN(c.parsed.y)+' est.'}}},scales:{x:{grid:{display:false},ticks:{maxRotation:40,color:'#3d5575'}},y:{grid:{color:GRID},stacked:true,ticks:{color:'#3d5575'}}}});
-}
-
-function rMovest(C){
-  const rows=[...C.movest].sort((a,b)=>b.fecha.localeCompare(a.fecha)).slice(0,20);
-  document.getElementById('tbMovest').innerHTML=rows.map(r=>{
-    const col=TC[r.turno]||'#607a96';
-    return `<tr><td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${shortDate(r.fecha)}</td><td><span class="t-badge" style="background:rgba(${hex2rgb(col)},.1);color:${col};border:1px solid rgba(${hex2rgb(col)},.2)">${r.turno.replace('Turno ','T')}</span></td><td style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis">${r.coord||'—'}</td><td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${r.origen||'—'}</td><td style="font-family:var(--mono);font-size:10px;color:var(--muted2)">${r.destino||'—'}</td><td><b style="font-family:var(--mono);font-weight:700;color:var(--violet)">${fmtN(r.cantidad)}</b></td></tr>`;
-  }).join('')||'<tr><td colspan="6" class="empty">Sin datos</td></tr>';
-}
-
-(async function init() {
-  try {
-    RAW = await loadEmbeddedData();
-    setDefaultDates();
-    applyFilter();
-    const tot=RAW.cajas.length+RAW.estibas.length+RAW.vinip.length+RAW.movest.length;
-    document.getElementById('hSub').textContent=`${tot.toLocaleString('es-CO')} registros · Cajas·${RAW.cajas.length} · Estibas·${RAW.estibas.length} · Vinip·${RAW.vinip.length} · Movest·${RAW.movest.length} · Mayo–Jun 2026`;
-  } catch(e) { console.error(e); }
-  const l=document.getElementById('loader');
-  l.classList.add('hide');
-  setTimeout(()=>l.style.display='none',600);
-  document.getElementById('progFill').style.width='0';
-})();
 </script>
 </body>
 </html>
