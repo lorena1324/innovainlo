@@ -508,22 +508,22 @@ function renderKPIs(){
             {label:'Cajas cargadas / día', jv:j.cajas_cargadas_dia, lv:l.cajas_cargadas_dia, dec:0},
             {label:'Cajas movidas / día', jv:j.cajas_movidas_dia, lv:l.cajas_movidas_dia, dec:0},
             {label:'Cargues / día', jv:j.cargues_dia, lv:l.cargues_dia, dec:1},
-            {label:'Tiempo prom. de cargue', jv:Math.round(j.tiempo_cargue_min), lv:Math.round(l.tiempo_cargue_min), suf:' min', dec:0},
-            {label:'Tiempo prom. de descargue', jv:Math.round(j.tiempo_descargue_min), lv:Math.round(l.tiempo_descargue_min), suf:' min', dec:0},
+            {label:'Tiempo prom. de cargue', jv:Math.round(j.tiempo_cargue_min), lv:Math.round(l.tiempo_cargue_min), suf:' min', dec:0, invert:true},
+            {label:'Tiempo prom. de descargue', jv:Math.round(j.tiempo_descargue_min), lv:Math.round(l.tiempo_descargue_min), suf:' min', dec:0, invert:true},
             {label:'Estibas totales / día', jv:j.estibas_totales_dia, lv:l.estibas_totales_dia, dec:0},
-            {label:'Estibas vinipeladas', jv:j.cajas_vinipeladas, lv:l.cajas_vinipeladas, dec:0},
             {label:'Estibas vinipeladas', jv:j.estibas_vinipeladas, lv:l.estibas_vinipeladas, dec:0},
             {label:'Días bache', jv:j.baches, lv:l.baches, dec:0, noDelta:true},
         ];
         el.innerHTML = defs.map(d=>{
             const delta = d.jv ? ((d.lv-d.jv)/d.jv*100) : 0;
+            const isGood = d.invert ? delta<=0 : delta>=0;
             return `<div class="kpi">
                 <div class="kpi-label">${d.label}</div>
                 <div style="display:flex;justify-content:space-between;align-items:baseline;">
                     <div><div style="font-size:9px;color:${COLORS.orange};text-transform:uppercase;letter-spacing:1px;">Junio</div><div class="kpi-val" style="font-size:18px;color:${COLORS.orange}">${d.dec?num1(d.jv):numero(d.jv)}${d.suf||''}</div></div>
                     <div style="text-align:right"><div style="font-size:9px;color:${COLORS.blue};text-transform:uppercase;letter-spacing:1px;">Julio</div><div class="kpi-val" style="font-size:18px;color:${COLORS.blue}">${d.dec?num1(d.lv):numero(d.lv)}${d.suf||''}</div></div>
                 </div>
-                ${!d.noDelta ? `<div class="kpi-delta ${delta>=0?'good':'bad'}" style="margin-top:10px;">${delta>=0?'▲':'▼'} ${pct(delta)}</div>` : `<div class="kpi-sub" style="margin-top:10px;">días marcados como bache</div>`}
+                ${!d.noDelta ? `<div class="kpi-delta ${isGood?'good':'bad'}" style="margin-top:10px;">${delta>=0?'▲':'▼'} ${pct(delta)}</div>` : `<div class="kpi-sub" style="margin-top:10px;">días marcados como bache</div>`}
             </div>`;
         }).join('');
         return;
@@ -532,12 +532,11 @@ function renderKPIs(){
     const a = aggFromDaily(rows);
     const accent = MES_COLOR[state.mes];
     el.innerHTML = [
-        kpiCard('Cajas totales / día', numero(a.cajas_totales_dia), `${numero(a.cajas_totales)} en el período`, accent),
-        kpiCard('Cajas cargadas / día', numero(a.cajas_cargadas_dia), `${numero(a.cajas_cargadas)} cajas cargadas`, accent),
-        kpiCard('Cajas descargadas / día', numero(a.cajas_descargadas/a.dias), `${numero(a.cajas_descargadas)} cajas descargadas`, accent),
-        kpiCard('Cajas movidas / día', numero(a.cajas_movidas_dia), `cargue + descargue`, accent),
-        kpiCard('Estibas totales / día', numero(a.estibas_totales_dia), `${numero(a.estibas_totales)} en el período`, accent),
-        kpiCard('Cajas vinipeladas', numero(a.cajas_vinipeladas), state.mes==='julio' ? 'julio no lo separa del cargue' : `${numero(a.cajas_vinipeladas/a.dias)} cajas/día`, accent),
+        kpiCard('Cajas totales', numero(a.cajas_totales), `${numero(a.cajas_totales_dia)} cajas/día en promedio`, accent),
+        kpiCard('Cajas cargadas', numero(a.cajas_cargadas), `${numero(a.cajas_cargadas_dia)} cajas/día en promedio`, accent),
+        kpiCard('Cajas descargadas', numero(a.cajas_descargadas), `${numero(a.cajas_descargadas/a.dias)} cajas/día en promedio`, accent),
+        kpiCard('Cajas movidas', numero(a.cajas_movidas), `${numero(a.cajas_movidas_dia)} cajas/día en promedio (cargue + descargue)`, accent),
+        kpiCard('Estibas totales', numero(a.estibas_totales), `${numero(a.estibas_totales_dia)} estibas/día en promedio`, accent),
         kpiCard('Estibas vinipeladas', numero(a.estibas_vinipeladas), state.mes==='julio' ? 'julio no lo separa del cargue' : `${numero(a.estibas_vinipeladas/a.dias)} estibas/día`, accent),
         kpiCard('Tiempo prom. de cargue', mins(a.tiempo_cargue_min), a.tiempo_cargue_min!==null ? `promedio por operación` : 'sin datos válidos', accent),
         kpiCard('Tiempo prom. de descargue', mins(a.tiempo_descargue_min), a.tiempo_descargue_min!==null ? `promedio por operación` : 'sin datos válidos', accent),
@@ -734,7 +733,7 @@ function renderResumenMes(){
             <div class="resumen-stat"><div class="num" style="color:${COLORS.blue}">${numero(l.estibas_totales)}</div><div class="lbl">Estibas totales · Julio</div></div>
         </div>
         <ul class="resumen-bullets">
-            <li>Junio movió <b>${numero(j.cajas_movidas_dia)} cajas/día</b> y <b>${numero(j.estibas_totales_dia)} estibas/día</b>, con <b>${numero(j.cajas_vinipeladas)} cajas</b> y <b>${numero(j.estibas_vinipeladas)} estibas</b> vinipeladas en el mes.</li>
+            <li>Junio movió <b>${numero(j.cajas_movidas_dia)} cajas/día</b> y <b>${numero(j.estibas_totales_dia)} estibas/día</b>, con <b>${numero(j.estibas_vinipeladas)} estibas vinipeladas</b> en el mes.</li>
             <li>Julio movió <b>${numero(l.cajas_movidas_dia)} cajas/día</b> y <b>${numero(l.estibas_totales_dia)} estibas/día</b> — el vinipelado no se registra aparte en julio, va mezclado en el cargue.</li>
             <li>Tiempos promedio: cargue <b>${Math.round(j.tiempo_cargue_min)} min (jun) / ${Math.round(l.tiempo_cargue_min)} min (jul)</b>, descargue <b>${Math.round(j.tiempo_descargue_min)} min (jun) / ${Math.round(l.tiempo_descargue_min)} min (jul)</b>.</li>
             <li><b>${j.baches} día(s) bache</b> en junio, <b>${l.baches} día(s) bache</b> en julio — casi todos domingos.</li>
@@ -744,15 +743,14 @@ function renderResumenMes(){
     const s = DATA[state.mes].summary;
     const accent = MES_COLOR[state.mes];
     const vinipeladoTxt = state.mes==='julio'
-        ? `Julio no separa el vinipelado del cargue en el registro — va incluido ahí, no aparece como cifra propia.`
-        : `Se vinipelaron <b>${numero(s.cajas_vinipeladas)} cajas</b> y <b>${numero(s.estibas_vinipeladas)} estibas</b> en el mes.`;
+        ? `Julio no registra estibas vinipeladas por separado.`
+        : `Se vinipelaron <b>${numero(s.estibas_vinipeladas)} estibas</b> en el mes.`;
     el.innerHTML = `
     <h3 class="resumen-title">📊 Resumen — ${MES_LABEL[state.mes]} 2026</h3>
     <p class="resumen-sub">Lo esencial del mes, en números reales.</p>
-    <div class="resumen-stats">
+    <div class="resumen-stats" style="grid-template-columns:repeat(3,1fr);">
         <div class="resumen-stat"><div class="num" style="color:${accent}">${numero(s.cajas_totales)}</div><div class="lbl">Cajas totales</div></div>
         <div class="resumen-stat"><div class="num" style="color:${accent}">${numero(s.estibas_totales)}</div><div class="lbl">Estibas totales</div></div>
-        <div class="resumen-stat"><div class="num" style="color:${accent}">${numero(s.cajas_vinipeladas)}</div><div class="lbl">Cajas vinipeladas</div></div>
         <div class="resumen-stat"><div class="num" style="color:${accent}">${numero(s.estibas_vinipeladas)}</div><div class="lbl">Estibas vinipeladas</div></div>
     </div>
     <ul class="resumen-bullets">
